@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>benginsroom</title>
+    <meta name="description" content="Bir web sayfası değil, bir oda. Eşyalara dokun, televizyonda aç." />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📺</text></svg>" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=VT323&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="app"></div>
+
+    <div id="tooltip" class="tooltip" hidden></div>
+
+    <div id="intro" class="intro">
+      <div class="intro-card">
+        <p class="intro-kicker">kapı aralık</p>
+        <h1>benginsroom</h1>
+        <p>Bir web sayfası değil, bir oda. İçeri gel, eşyalara dokun —<br />her biri televizyonda başka bir şey açar.</p>
+        <button id="enter" type="button">Odaya gir</button>
+      </div>
+    </div>
+
+    <button id="back" class="back" type="button" hidden>← Odaya dön <kbd>Esc</kbd></button>
+    <nav id="dock" class="dock" aria-label="Odadaki eşyalar"></nav>
+    <div id="hint" class="hint">Sürükle: etrafına bak · Tekerlek: yaklaş · Tıkla: eşyayı kullan</div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
