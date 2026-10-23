@@ -59,9 +59,10 @@ Lint ya da test komutu yok. Bir değişikliği doğrulamak için `npm run build`
 - Harici bağımlılık eklemeden önce sor. Şu anki tek runtime bağımlılığı `three`.
 - Stiller `src/style.css` içinde. Fontlar Google Fonts'tan yükleniyor (Space Grotesk, ekran için VT323).
 
-## Durum (2026-10-22)
+## Durum (2026-10-23)
 
 - Tamamlananlar: oda + 10 eşya, TV ve kanal sistemi, 9 kanal (rehber, hakkımda, projeler, müzik, hava durumu, saat,
   yılan oyunu, galeri, iletişim), gündüz/gece döngüsü, canlı hava verisine bağlı bulutlar, giriş ekranı, dock.
-- Yer tutucu içerik duruyor: `config.js` içindeki e-posta (`merhaba@ornek.com`), LinkedIn linki ve picsum galeri
-  görselleri gerçek içerikle değiştirilecek.
+- Hakkımda metni, e-posta ve LinkedIn gerçek bilgilerle güncellendi (kaynak: bengin-portfolio.vercel.app).
+- Yer tutucu içerik duruyor: `config.js` içindeki picsum galeri görselleri gerçek fotoğraflarla değiştirilecek.
+- TV ekranı 1280×720 sabit ve kaydırma yok: hakkımda ve iletişim kanallarına içerik eklerken taşmaya dikkat et.
