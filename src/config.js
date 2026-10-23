@@ -6,12 +6,12 @@ export const config = {
   githubUser: 'bengin-noyan',
 
   about: {
-    title: 'Merhaba, ben Bengin.',
+    title: 'Merhaba, ben Bengin Noyan.',
     paragraphs: [
-      'Bu oda benim dijital köşem. Klasik bir web sayfası yerine, yaşadığım ve ürettiğim bir mekânın içinde dolaşman için tasarlandı.',
-      'Burada projelerimi, dinlediklerimi, ilham aldıklarımı ve bana ulaşabileceğin yolları bulacaksın. Her eşya bir kapı.',
+      'Yazılım geliştiriciyim. C#, .NET, Go ve Python ile uçtan uca sistemler kuruyorum; SaaS platformlarından ERP sistemlerine ve görüntü işlemeye kadar.',
+      'Bu oda benim dijital köşem. Projelerimi, dinlediklerimi ve bana ulaşabileceğin yolları burada bulacaksın. Her eşya bir kapı.',
     ],
-    tags: ['Yazılım', 'Tasarım', 'Müzik', 'Oyunlar'],
+    tags: ['C# / .NET', 'Go', 'Python', 'Vue / React', 'PostgreSQL'],
   },
 
   music: {
@@ -35,7 +35,11 @@ export const config = {
 
   contact: [
     { label: 'GitHub', value: 'github.com/bengin-noyan', href: 'https://github.com/bengin-noyan' },
-    { label: 'E-posta', value: 'merhaba@ornek.com', href: 'mailto:merhaba@ornek.com' },
-    { label: 'LinkedIn', value: 'linkedin.com/in/kullanici', href: 'https://www.linkedin.com/' },
+    { label: 'E-posta', value: 'benginnyn72@gmail.com', href: 'mailto:benginnyn72@gmail.com' },
+    {
+      label: 'LinkedIn',
+      value: 'linkedin.com/in/bengin-noyan',
+      href: 'https://www.linkedin.com/in/bengin-noyan-028b07312',
+    },
   ],
 };
