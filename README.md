@@ -18,8 +18,8 @@ npm run build    # dist/ klasörüne statik çıktı
 | Eşya | TV'de açılan | Kaynak |
 | --- | --- | --- |
 | Televizyon | Kanal rehberi | — |
-| Kitaplık | Hakkımda | `config.about` |
-| Bilgisayar | Projeler | GitHub API (canlı) |
+| Kitaplık | Hakkımda · Deneyim · Yetenekler (sekmeli) | `config.about`, `config.experience`, `config.skills` |
+| Bilgisayar | Projeler | `config.projects` |
 | Pikap | Müzik | YouTube gömme |
 | Pencere | Hava durumu | Open-Meteo (canlı) |
 | Duvar saati | Saat + dünya saatleri | — |

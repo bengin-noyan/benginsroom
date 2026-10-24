@@ -3,16 +3,111 @@
 
 export const config = {
   owner: 'Bengin',
-  githubUser: 'bengin-noyan',
 
+  // Kaynak: bengin-portfolio.vercel.app
   about: {
-    title: 'Merhaba, ben Bengin Noyan.',
+    title: 'Bengin Noyan',
+    role: 'Software Developer',
+    photo: 'bengin-noyan.jpg', // public/ içinde
     paragraphs: [
-      'Yazılım geliştiriciyim. C#, .NET, Go ve Python ile uçtan uca sistemler kuruyorum; SaaS platformlarından ERP sistemlerine ve görüntü işlemeye kadar.',
-      'Bu oda benim dijital köşem. Projelerimi, dinlediklerimi ve bana ulaşabileceğin yolları burada bulacaksın. Her eşya bir kapı.',
+      'Pamukkale Üniversitesi Yönetim Bilişim Sistemleri bölümü mezunu olarak; C#, .NET, Go ve Python ekosistemlerinde modern web ve masaüstü uygulamaları geliştiriyorum.',
+      'Kurumsal kaynak planlama (ERP), süreç otomasyonları ve veritabanı mimarileri üzerine uçtan uca sistemler kurgularken; yazılım altyapımı Makine Öğrenmesi ve Görüntü İşleme modellerini uygulamalara entegre etme yetkinliğiyle güçlendiriyorum.',
+      'Yönetim Bilişim Sistemleri disiplininden gelen sistem analizi ve süreç yönetimi vizyonumu, güçlü yazılım pratikleriyle harmanlayarak karmaşık iş problemlerine katma değerli ve sürdürülebilir çözümler sunmayı hedefliyorum.',
     ],
-    tags: ['C# / .NET', 'Go', 'Python', 'Vue / React', 'PostgreSQL'],
+    languages: ['Türkçe · Ana dil', 'İngilizce · B1', 'Almanca · A1'],
   },
+
+  experience: [
+    { role: 'Proje Lideri', org: 'NowlSoft', date: '10/2026 – Devam ediyor', place: 'Batman' },
+    {
+      role: 'Yazılım Geliştirme Stajyeri',
+      org: 'NowlSoft',
+      date: '07/2026 – 10/2026',
+      place: 'Batman',
+      desc: 'Kamu kurumları ve işletmeler için ERP ve süreç otomasyonları; Go (Wails3), C# (.NET), Vue 3 ve React ile LAN tabanlı dağıtık sistemler, UBL-TR 1.2 e-Fatura, RBAC ve YOLOv8 entegrasyonları.',
+    },
+    {
+      role: 'IT Destek Asistanı · İŞKUR Gençlik Programı',
+      org: 'Pamukkale Üniversitesi İİBF Bilgi İşlem',
+      date: '01/2026 – 06/2026',
+      place: 'Denizli',
+      desc: 'Sunucu ve bilgisayar yapılandırması, yazılım kurulum ve lisanslama, Active Directory yetkilendirmeleri, veri yedekleme takibi ve ticket yönetimi.',
+    },
+    {
+      role: 'Yönetim Bilişim Sistemleri, Lisans',
+      org: 'Pamukkale Üniversitesi',
+      date: '09/2022 – 06/2026',
+      place: 'Denizli',
+    },
+  ],
+
+  skills: [
+    { group: 'Diller', items: ['Go', 'C#', '.NET', 'Python', 'TypeScript', 'JavaScript', 'C', 'HTML5', 'CSS3', 'VBA'] },
+    {
+      group: 'Web & masaüstü',
+      items: ['Wails3', 'Vue 3', 'React 18', 'Tailwind CSS', 'Vite', 'Node.js', 'Streamlit', 'chi', 'Leaflet', 'RESTful API', 'Multi-tenant SaaS', 'RBAC', 'Web3', 'DApps'],
+    },
+    {
+      group: 'Veritabanı',
+      items: ['PostgreSQL', 'MS SQL Server', 'SQLite', 'Firebase', 'Row-Level Security', 'Triggers', 'ER diyagramları', '3NF'],
+    },
+    {
+      group: 'Yapay zekâ & görüntü',
+      items: ['YOLOv8', 'Computer Vision', 'Machine / Deep Learning', 'OpenCV', 'Ultralytics', 'Transfer Learning', 'Roboflow', 'Gemini API', 'Scikit-learn', 'NumPy', 'Pandas', 'Plotly'],
+    },
+    {
+      group: 'Entegrasyonlar',
+      items: ['UBL-TR 1.2 e-Fatura', 'QNB e-Fatura / e-Arşiv', 'iyzico', 'NetGSM', 'WhatsApp Business', 'Google Calendar', 'Sentinel Hub', 'TCMB Kur'],
+    },
+    {
+      group: 'DevOps & test',
+      items: ['Docker', 'Docker Compose', 'nginx', 'GitHub Actions', 'Linux', 'Playwright', 'Birim & entegrasyon testi', 'Yük testi'],
+    },
+    {
+      group: 'Araçlar & yöntem',
+      items: ['Git', 'GitHub', 'Postman', 'VS Code', 'Visual Studio', 'PyCharm', 'SDLC', 'UML', 'DFD', 'NPV / IRR'],
+    },
+  ],
+
+  projects: [
+    {
+      name: 'DentalPro',
+      year: 'Canlıda',
+      desc: 'Diş klinikleri ve protez laboratuvarları için çok kiracılı SaaS. PostgreSQL RLS ile veri izolasyonu, ödeme, SMS ve e-Fatura entegrasyonları.',
+      tags: ['Go', 'Vue 3', 'PostgreSQL'],
+      href: 'https://dentalpro.tr',
+    },
+    {
+      name: 'NowlTarım',
+      year: '2026',
+      desc: '~20.000 dönümlük tarım işletmeleri için 13 modüllü ERP; uydu NDVI haritaları ve YOLOv8 + Gemini zirai analizleri.',
+      tags: ['Go', 'React 18', 'PostgreSQL 16'],
+    },
+    {
+      name: 'Bitki Hastalığı Teşhisi',
+      year: '2026',
+      desc: 'Bitirme tezi: YOLOv8 ile bitki hastalığı teşhisi (%94.1 mAP50) ve Streamlit tabanlı karar destek paneli.',
+      tags: ['Python', 'YOLOv8', 'Streamlit'],
+    },
+    {
+      name: 'BraDent',
+      year: '2026',
+      desc: 'Diş klinikleri için yerel ağda istemci-sunucu modelinde çalışan masaüstü klinik otomasyonu; FDI diş şeması, randevu ve SMS kuyruğu.',
+      tags: ['Go', 'Wails3', 'PostgreSQL 17'],
+    },
+    {
+      name: 'MLS KİMYA',
+      year: '2026',
+      desc: 'CGO-free saf Go ile tek dosyalı (.exe) muhasebe ve iş takip otomasyonu; tamsayı tabanlı kur farkı hesap motoru.',
+      tags: ['Go', 'Wails3', 'SQLite'],
+    },
+    {
+      name: 'PauGo',
+      year: '2025',
+      desc: 'Kampüs içi akıllı e-scooter paylaşım sisteminin uçtan uca tasarımı ve finansal fizibilitesi (IRR %60, NPV 7.22M TL).',
+      tags: ['C#', 'MS SQL Server', 'UML'],
+    },
+  ],
 
   music: {
     youtubeId: 'jfKfPfyJRdk',

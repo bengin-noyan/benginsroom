@@ -44,9 +44,9 @@ Lint ya da test komutu yok. Bir değişikliği doğrulamak için `npm run build`
 - `src/channels/`: TV içerikleri. Her dosya `mount(host, ctx)` dışa aktarır, DOM'u `host` içine kurar ve gerekiyorsa
   temizlik fonksiyonu döndürür (interval, listener vb.). `ctx` içinde `channels` ve `goTo(id)` var.
   Kayıt `channels/index.js` içinde: listedeki sıra kanal numarasıdır, `accent` TV ışığının rengidir.
-- `src/services/`: harici API'ler. `weather.js` Open-Meteo'yu (anahtarsız) 10 dakikalık önbellekle çağırır. Projeler
-  kanalı GitHub API'sini canlı kullanır (`config.githubUser`).
-- `src/config.js`: tüm kişisel içerik (hakkımda, müzik/YouTube ID, hava konumu, galeri, iletişim). İçerik
+- `src/services/`: harici API'ler. `weather.js` Open-Meteo'yu (anahtarsız) 10 dakikalık önbellekle çağırır.
+- `src/config.js`: tüm kişisel içerik (hakkımda, deneyim, yetenekler, projeler, müzik/YouTube ID, hava konumu,
+  galeri, iletişim). Profil fotoğrafı `public/bengin-noyan.jpg`. İçerik
   değişikliği buraya yapılır, kanal kodunun içine yazılmaz.
 - `src/utils.js`: `esc` (HTML kaçışı), `wait`, `easeInOutCubic`, `mulberry32` (tohumlu rastgele), `canvasTexture`.
 
@@ -59,10 +59,12 @@ Lint ya da test komutu yok. Bir değişikliği doğrulamak için `npm run build`
 - Harici bağımlılık eklemeden önce sor. Şu anki tek runtime bağımlılığı `three`.
 - Stiller `src/style.css` içinde. Fontlar Google Fonts'tan yükleniyor (Space Grotesk, ekran için VT323).
 
-## Durum (2026-10-23)
+## Durum (2026-10-24)
 
 - Tamamlananlar: oda + 10 eşya, TV ve kanal sistemi, 9 kanal (rehber, hakkımda, projeler, müzik, hava durumu, saat,
   yılan oyunu, galeri, iletişim), gündüz/gece döngüsü, canlı hava verisine bağlı bulutlar, giriş ekranı, dock.
-- Hakkımda metni, e-posta ve LinkedIn gerçek bilgilerle güncellendi (kaynak: bengin-portfolio.vercel.app).
+- Portföydeki (bengin-portfolio.vercel.app) hakkımda, fotoğraf, deneyim, eğitim, yetenekler, 6 proje ve iletişim
+  bilgileri eklendi. Hakkımda kanalı sekmeli (Hakkımda / Deneyim / Yetenekler); projeler artık GitHub'dan değil
+  `config.projects`'ten geliyor. Sertifikalar eklenmedi.
 - Yer tutucu içerik duruyor: `config.js` içindeki picsum galeri görselleri gerçek fotoğraflarla değiştirilecek.
 - TV ekranı 1280×720 sabit ve kaydırma yok: hakkımda ve iletişim kanallarına içerik eklerken taşmaya dikkat et.
