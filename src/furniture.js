@@ -518,6 +518,22 @@ function armchair() {
   return g;
 }
 
+function sofa() {
+  const g = new THREE.Group();
+  const fabric = std('#3f5e6b', { roughness: 0.95 });
+  const cushion = std('#4a6d7b', { roughness: 0.95 });
+  const wood = std('#5a3b28');
+  g.add(box(2.0, 0.22, 0.9, fabric, [0, 0.3, 0]));
+  g.add(box(2.0, 0.56, 0.18, fabric, [0, 0.69, -0.36]));
+  for (const x of [-1.0, 1.0]) g.add(box(0.16, 0.32, 0.9, fabric, [x, 0.54, 0]));
+  for (const x of [-0.46, 0.46]) {
+    g.add(box(0.9, 0.12, 0.7, cushion, [x, 0.47, 0.08]));
+    g.add(box(0.88, 0.4, 0.12, cushion, [x, 0.72, -0.22]));
+  }
+  for (const x of [-0.92, 0.92]) for (const z of [-0.38, 0.38]) g.add(cyl(0.025, 0.018, 0.19, wood, [x, 0.095, z], 10));
+  return g;
+}
+
 // ---------------------------------------------------------------- Kurulum
 export function buildFurniture(scene) {
   const player = recordPlayer();
@@ -526,7 +542,12 @@ export function buildFurniture(scene) {
   const lamp = floorLamp();
   const pot = plant();
 
-  const decor = [tvStand(), coffeeTable(), pendantLamp(), armchair()];
+  // Ortadaki kanepe TV'ye bakar; sehpadaki oyun kolu ve telefonu genel görünümde örtmesin diye geride durur.
+  const couch = sofa();
+  couch.position.set(0, 0, 0.6);
+  couch.rotation.y = Math.PI;
+
+  const decor = [tvStand(), coffeeTable(), pendantLamp(), armchair(), couch];
   decor.forEach((d) => scene.add(d));
 
   // Her eşya bir tetikleyici: channel → TV'de açılır, action → odada bir şey olur.
