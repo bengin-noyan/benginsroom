@@ -67,6 +67,6 @@ Lint ya da test komutu yok. Bir değişikliği doğrulamak için `npm run build`
 - Portföydeki (bengin-portfolio.vercel.app) hakkımda, fotoğraf, deneyim, eğitim, yetenekler, 6 proje ve iletişim
   bilgileri eklendi. Hakkımda kanalı sekmeli (Hakkımda / Deneyim / Yetenekler); projeler artık GitHub'dan değil
   `config.projects`'ten geliyor. Sertifikalar eklenmedi.
-- Galeri kanalı kaldırıldı (2026-10-25); tablo artık süs. Müzik kanalı da kaldırıldı: pikap TV'yi açmaz, odada
+- Galeri kanalı kaldırıldı (2026-10-25); tablo artık süs. Müzik kanalı da kaldırıldı: plak çalar TV'yi açmaz, odada
   `public/music` içindeki kamu malı klasik kayıtları (`config.music`) çalar, her dokunuşta sonraki parçaya geçer.
 - TV ekranı 1280×720 sabit ve kaydırma yok: hakkımda ve iletişim kanallarına içerik eklerken taşmaya dikkat et.

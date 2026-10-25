@@ -39,7 +39,7 @@ function tvStand() {
   return g;
 }
 
-// ---------------------------------------------------------------- Pikap
+// ---------------------------------------------------------------- Plak çalar
 function recordPlayer() {
   const g = new THREE.Group();
   const body = std('#2d3a3a', { roughness: 0.55 });
@@ -580,7 +580,7 @@ export function buildFurniture(scene) {
     { id: 'desk', label: 'Bilgisayar', hint: 'Projeler', channel: 'projects', object: desk() },
     {
       id: 'record',
-      label: 'Pikap',
+      label: 'Plak çalar',
       get hint() {
         return player.hint;
       },

@@ -109,7 +109,7 @@ export const config = {
     },
   ],
 
-  // Pikabın çaldığı parçalar (public/music). Kayıtlar Wikimedia Commons'tan, kamu malı (public domain).
+  // Plak çaların çaldığı parçalar (public/music). Kayıtlar Wikimedia Commons'tan, kamu malı (public domain).
   music: [
     { src: 'music/debussy-clair-de-lune.mp3', title: 'Clair de Lune', artist: 'Claude Debussy' },
     { src: 'music/beethoven-moonlight.mp3', title: 'Ay Işığı Sonatı', artist: 'Ludwig van Beethoven' },
