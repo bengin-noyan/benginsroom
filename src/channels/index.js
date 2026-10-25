@@ -5,7 +5,6 @@ import * as music from './music.js';
 import * as weather from './weather.js';
 import * as time from './time.js';
 import * as game from './game.js';
-import * as gallery from './gallery.js';
 import * as contact from './contact.js';
 
 // Sıra = kanal numarası. accent, TV'nin odaya yaydığı ışığın rengi.
@@ -17,6 +16,5 @@ export const channels = [
   { id: 'weather', title: 'Hava durumu', icon: '🌤️', accent: '#7fd1ff', mount: weather.mount },
   { id: 'time', title: 'Saat', icon: '🕰️', accent: '#ffd27a', mount: time.mount },
   { id: 'game', title: 'Yılan', icon: '🎮', accent: '#7CFF8A', mount: game.mount },
-  { id: 'gallery', title: 'Galeri', icon: '🖼️', accent: '#f2a65a', mount: gallery.mount },
   { id: 'contact', title: 'İletişim', icon: '📞', accent: '#c59bff', mount: contact.mount },
 ];

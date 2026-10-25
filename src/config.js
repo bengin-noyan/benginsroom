@@ -109,24 +109,21 @@ export const config = {
     },
   ],
 
-  music: {
-    youtubeId: 'jfKfPfyJRdk',
-    title: 'lofi hip hop radio',
-    artist: 'Lofi Girl · canlı yayın',
-  },
+  // İlk parça kanal açılınca çalar; ID'ler YouTube video ID'si.
+  music: [
+    { youtubeId: 'jfKfPfyJRdk', title: 'lofi hip hop radio', artist: 'Lofi Girl · canlı yayın' },
+    { youtubeId: 'CvFH_6DNRCY', title: 'Clair de Lune', artist: 'Claude Debussy' },
+    { youtubeId: '4Tr0otuiQuU', title: 'Ay Işığı Sonatı', artist: 'Ludwig van Beethoven' },
+    { youtubeId: '9E6b3swbnWg', title: 'Nocturne Op. 9 No. 2', artist: 'Frédéric Chopin' },
+    { youtubeId: 'S-Xm7s9eGxU', title: 'Gymnopédie No. 1', artist: 'Erik Satie' },
+    { youtubeId: '1prweT95Mo0', title: 'Çello Süiti No. 1 · Prélude', artist: 'J. S. Bach · Yo-Yo Ma' },
+  ],
 
   weather: {
     city: 'İstanbul',
     latitude: 41.01,
     longitude: 28.98,
   },
-
-  gallery: [
-    { src: 'https://picsum.photos/seed/benginsroom1/1280/720', caption: 'Sabah ışığı' },
-    { src: 'https://picsum.photos/seed/benginsroom2/1280/720', caption: 'Yolda' },
-    { src: 'https://picsum.photos/seed/benginsroom3/1280/720', caption: 'Şehir' },
-    { src: 'https://picsum.photos/seed/benginsroom4/1280/720', caption: 'Sessizlik' },
-  ],
 
   contact: [
     { label: 'GitHub', value: 'github.com/bengin-noyan', href: 'https://github.com/bengin-noyan' },

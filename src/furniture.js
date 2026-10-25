@@ -547,7 +547,7 @@ export function buildFurniture(scene) {
   couch.position.set(0, 0, 0.6);
   couch.rotation.y = Math.PI;
 
-  const decor = [tvStand(), coffeeTable(), pendantLamp(), armchair(), couch];
+  const decor = [tvStand(), coffeeTable(), pendantLamp(), armchair(), couch, poster()];
   decor.forEach((d) => scene.add(d));
 
   // Her eşya bir tetikleyici: channel → TV'de açılır, action → odada bir şey olur.
@@ -558,7 +558,6 @@ export function buildFurniture(scene) {
     { id: 'window', label: 'Pencere', hint: 'Hava durumu', channel: 'weather', object: win.group },
     { id: 'clock', label: 'Duvar saati', hint: 'Saat', channel: 'time', object: clock.group },
     { id: 'controller', label: 'Oyun kolu', hint: 'Oyna', channel: 'game', object: controller() },
-    { id: 'poster', label: 'Tablo', hint: 'Galeri', channel: 'gallery', object: poster() },
     { id: 'phone', label: 'Telefon', hint: 'İletişim', channel: 'contact', object: phone() },
     { id: 'lamp', label: 'Lamba', hint: 'Aç / kapat', action: () => lamp.toggle(), object: lamp.group },
     { id: 'plant', label: 'Bitki', hint: 'Dokun', action: () => pot.poke(), object: pot.group },

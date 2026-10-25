@@ -45,8 +45,8 @@ Lint ya da test komutu yok. Bir değişikliği doğrulamak için `npm run build`
   temizlik fonksiyonu döndürür (interval, listener vb.). `ctx` içinde `channels` ve `goTo(id)` var.
   Kayıt `channels/index.js` içinde: listedeki sıra kanal numarasıdır, `accent` TV ışığının rengidir.
 - `src/services/`: harici API'ler. `weather.js` Open-Meteo'yu (anahtarsız) 10 dakikalık önbellekle çağırır.
-- `src/config.js`: tüm kişisel içerik (hakkımda, deneyim, yetenekler, projeler, müzik/YouTube ID, hava konumu,
-  galeri, iletişim). Profil fotoğrafı `public/bengin-noyan.jpg`. İçerik
+- `src/config.js`: tüm kişisel içerik (hakkımda, deneyim, yetenekler, projeler, müzik listesi (YouTube ID), hava konumu,
+  iletişim). Profil fotoğrafı `public/bengin-noyan.jpg`. İçerik
   değişikliği buraya yapılır, kanal kodunun içine yazılmaz.
 - `src/utils.js`: `esc` (HTML kaçışı), `wait`, `easeInOutCubic`, `mulberry32` (tohumlu rastgele), `canvasTexture`.
 
@@ -59,12 +59,14 @@ Lint ya da test komutu yok. Bir değişikliği doğrulamak için `npm run build`
 - Harici bağımlılık eklemeden önce sor. Şu anki tek runtime bağımlılığı `three`.
 - Stiller `src/style.css` içinde. Fontlar Google Fonts'tan yükleniyor (Space Grotesk, ekran için VT323).
 
-## Durum (2026-10-24)
+## Durum (2026-10-25)
 
-- Tamamlananlar: oda + 10 eşya, TV ve kanal sistemi, 9 kanal (rehber, hakkımda, projeler, müzik, hava durumu, saat,
-  yılan oyunu, galeri, iletişim), gündüz/gece döngüsü, canlı hava verisine bağlı bulutlar, giriş ekranı, dock.
+- Tamamlananlar: oda + 9 tıklanabilir eşya (tablo ve kanepe süs), TV ve kanal sistemi, 8 kanal (rehber, hakkımda,
+  projeler, müzik, hava durumu, saat, yılan oyunu, iletişim), gündüz/gece döngüsü, canlı hava verisine bağlı bulutlar,
+  giriş ekranı, dock.
 - Portföydeki (bengin-portfolio.vercel.app) hakkımda, fotoğraf, deneyim, eğitim, yetenekler, 6 proje ve iletişim
   bilgileri eklendi. Hakkımda kanalı sekmeli (Hakkımda / Deneyim / Yetenekler); projeler artık GitHub'dan değil
   `config.projects`'ten geliyor. Sertifikalar eklenmedi.
-- Yer tutucu içerik duruyor: `config.js` içindeki picsum galeri görselleri gerçek fotoğraflarla değiştirilecek.
+- Galeri kanalı kaldırıldı (2026-10-25); tablo artık süs. Müzik kanalı `config.music` listesinden parça seçtirir
+  (lofi + 5 klasik eser).
 - TV ekranı 1280×720 sabit ve kaydırma yok: hakkımda ve iletişim kanallarına içerik eklerken taşmaya dikkat et.

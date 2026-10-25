@@ -20,11 +20,10 @@ npm run build    # dist/ klasörüne statik çıktı
 | Televizyon | Kanal rehberi | — |
 | Kitaplık | Hakkımda · Deneyim · Yetenekler (sekmeli) | `config.about`, `config.experience`, `config.skills` |
 | Bilgisayar | Projeler | `config.projects` |
-| Pikap | Müzik | YouTube gömme |
+| Pikap | Müzik (lofi + klasik parça listesi) | `config.music` (YouTube gömme) |
 | Pencere | Hava durumu | Open-Meteo (canlı) |
 | Duvar saati | Saat + dünya saatleri | — |
 | Oyun kolu | Yılan oyunu | — |
-| Tablo | Galeri | `config.gallery` |
 | Telefon | İletişim | `config.contact` |
 | Lamba | Odanın ışığını açar/kapatır | — |
 | Bitki | Dokununca sallanır | — |
@@ -34,7 +33,7 @@ duvar saati gerçek saati gösterir, müzik çalarken plak döner, TV'nin odaya 
 
 ## İçeriği değiştirmek
 
-Metinler, linkler, video, galeri ve konum `src/config.js` içinde.
+Metinler, linkler, müzik listesi ve konum `src/config.js` içinde.
 
 Yeni bir kanal eklemek için:
 
