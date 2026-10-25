@@ -109,14 +109,13 @@ export const config = {
     },
   ],
 
-  // İlk parça kanal açılınca çalar; ID'ler YouTube video ID'si.
+  // Pikabın çaldığı parçalar (public/music). Kayıtlar Wikimedia Commons'tan, kamu malı (public domain).
   music: [
-    { youtubeId: 'jfKfPfyJRdk', title: 'lofi hip hop radio', artist: 'Lofi Girl · canlı yayın' },
-    { youtubeId: 'CvFH_6DNRCY', title: 'Clair de Lune', artist: 'Claude Debussy' },
-    { youtubeId: '4Tr0otuiQuU', title: 'Ay Işığı Sonatı', artist: 'Ludwig van Beethoven' },
-    { youtubeId: '9E6b3swbnWg', title: 'Nocturne Op. 9 No. 2', artist: 'Frédéric Chopin' },
-    { youtubeId: 'S-Xm7s9eGxU', title: 'Gymnopédie No. 1', artist: 'Erik Satie' },
-    { youtubeId: '1prweT95Mo0', title: 'Çello Süiti No. 1 · Prélude', artist: 'J. S. Bach · Yo-Yo Ma' },
+    { src: 'music/debussy-clair-de-lune.mp3', title: 'Clair de Lune', artist: 'Claude Debussy' },
+    { src: 'music/beethoven-moonlight.mp3', title: 'Ay Işığı Sonatı', artist: 'Ludwig van Beethoven' },
+    { src: 'music/chopin-nocturne-op9-2.mp3', title: 'Nocturne Op. 9 No. 2', artist: 'Frédéric Chopin' },
+    { src: 'music/satie-gymnopedie-1.mp3', title: 'Gymnopédie No. 1', artist: 'Erik Satie' },
+    { src: 'music/bach-cello-suite-1-prelude.mp3', title: 'Çello Süiti No. 1 · Prélude', artist: 'J. S. Bach' },
   ],
 
   weather: {

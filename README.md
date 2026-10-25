@@ -20,7 +20,7 @@ npm run build    # dist/ klasörüne statik çıktı
 | Televizyon | Kanal rehberi | — |
 | Kitaplık | Hakkımda · Deneyim · Yetenekler (sekmeli) | `config.about`, `config.experience`, `config.skills` |
 | Bilgisayar | Projeler | `config.projects` |
-| Pikap | Müzik (lofi + klasik parça listesi) | `config.music` (YouTube gömme) |
+| Pikap | Odada klasik müzik çalar, her dokunuşta sonraki parça | `config.music`, `public/music` |
 | Pencere | Hava durumu | Open-Meteo (canlı) |
 | Duvar saati | Saat + dünya saatleri | — |
 | Oyun kolu | Yılan oyunu | — |

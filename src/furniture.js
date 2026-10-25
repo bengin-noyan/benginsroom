@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { canvasTexture, mulberry32 } from './utils.js';
 import { currentHour, daylightAt } from './daylight.js';
 import { fetchWeather } from './services/weather.js';
+import { config } from './config.js';
 
 const std = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.75, ...o });
 
@@ -63,7 +64,30 @@ function recordPlayer() {
   arm.rotation.y = 0.3;
   g.add(arm);
   g.position.set(2.05, 0, -3.2);
-  return { group: g, record };
+
+  // Her dokunuş sıradaki parçayı çalar; listenin sonundan sonra durur. Biten parça da sıradakine geçer.
+  const audio = new Audio();
+  let track = -1;
+  const next = () => {
+    track = track + 1 < config.music.length ? track + 1 : -1;
+    if (track < 0) return audio.pause();
+    audio.src = config.music[track].src;
+    audio.play().catch(() => {});
+  };
+  audio.addEventListener('ended', next);
+
+  return {
+    group: g,
+    next,
+    get hint() {
+      if (track < 0) return 'Müzik çal';
+      const { title, artist } = config.music[track];
+      return `♪ ${title} · ${artist} — dokun: ${track + 1 < config.music.length ? 'sonraki' : 'durdur'}`;
+    },
+    update(dt) {
+      if (!audio.paused) record.rotation.y -= dt * 3.5;
+    },
+  };
 }
 
 // ---------------------------------------------------------------- Kitaplık
@@ -554,7 +578,15 @@ export function buildFurniture(scene) {
   const items = [
     { id: 'bookshelf', label: 'Kitaplık', hint: 'Hakkımda', channel: 'about', object: bookshelf() },
     { id: 'desk', label: 'Bilgisayar', hint: 'Projeler', channel: 'projects', object: desk() },
-    { id: 'record', label: 'Pikap', hint: 'Müzik', channel: 'music', object: player.group },
+    {
+      id: 'record',
+      label: 'Pikap',
+      get hint() {
+        return player.hint;
+      },
+      action: () => player.next(),
+      object: player.group,
+    },
     { id: 'window', label: 'Pencere', hint: 'Hava durumu', channel: 'weather', object: win.group },
     { id: 'clock', label: 'Duvar saati', hint: 'Saat', channel: 'time', object: clock.group },
     { id: 'controller', label: 'Oyun kolu', hint: 'Oyna', channel: 'game', object: controller() },
@@ -566,8 +598,8 @@ export function buildFurniture(scene) {
 
   return {
     items,
-    update(dt, t, state) {
-      if (state.channel === 'music') player.record.rotation.y -= dt * 3.5;
+    update(dt, t) {
+      player.update(dt);
       win.update(t);
       clock.update();
       lamp.update(dt);

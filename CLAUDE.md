@@ -45,7 +45,7 @@ Lint ya da test komutu yok. Bir değişikliği doğrulamak için `npm run build`
   temizlik fonksiyonu döndürür (interval, listener vb.). `ctx` içinde `channels` ve `goTo(id)` var.
   Kayıt `channels/index.js` içinde: listedeki sıra kanal numarasıdır, `accent` TV ışığının rengidir.
 - `src/services/`: harici API'ler. `weather.js` Open-Meteo'yu (anahtarsız) 10 dakikalık önbellekle çağırır.
-- `src/config.js`: tüm kişisel içerik (hakkımda, deneyim, yetenekler, projeler, müzik listesi (YouTube ID), hava konumu,
+- `src/config.js`: tüm kişisel içerik (hakkımda, deneyim, yetenekler, projeler, müzik listesi, hava konumu,
   iletişim). Profil fotoğrafı `public/bengin-noyan.jpg`. İçerik
   değişikliği buraya yapılır, kanal kodunun içine yazılmaz.
 - `src/utils.js`: `esc` (HTML kaçışı), `wait`, `easeInOutCubic`, `mulberry32` (tohumlu rastgele), `canvasTexture`.
@@ -61,12 +61,12 @@ Lint ya da test komutu yok. Bir değişikliği doğrulamak için `npm run build`
 
 ## Durum (2026-10-25)
 
-- Tamamlananlar: oda + 9 tıklanabilir eşya (tablo ve kanepe süs), TV ve kanal sistemi, 8 kanal (rehber, hakkımda,
-  projeler, müzik, hava durumu, saat, yılan oyunu, iletişim), gündüz/gece döngüsü, canlı hava verisine bağlı bulutlar,
+- Tamamlananlar: oda + 9 tıklanabilir eşya (tablo ve kanepe süs), TV ve kanal sistemi, 7 kanal (rehber, hakkımda,
+  projeler, hava durumu, saat, yılan oyunu, iletişim), gündüz/gece döngüsü, canlı hava verisine bağlı bulutlar,
   giriş ekranı, dock.
 - Portföydeki (bengin-portfolio.vercel.app) hakkımda, fotoğraf, deneyim, eğitim, yetenekler, 6 proje ve iletişim
   bilgileri eklendi. Hakkımda kanalı sekmeli (Hakkımda / Deneyim / Yetenekler); projeler artık GitHub'dan değil
   `config.projects`'ten geliyor. Sertifikalar eklenmedi.
-- Galeri kanalı kaldırıldı (2026-10-25); tablo artık süs. Müzik kanalı `config.music` listesinden parça seçtirir
-  (lofi + 5 klasik eser).
+- Galeri kanalı kaldırıldı (2026-10-25); tablo artık süs. Müzik kanalı da kaldırıldı: pikap TV'yi açmaz, odada
+  `public/music` içindeki kamu malı klasik kayıtları (`config.music`) çalar, her dokunuşta sonraki parçaya geçer.
 - TV ekranı 1280×720 sabit ve kaydırma yok: hakkımda ve iletişim kanallarına içerik eklerken taşmaya dikkat et.

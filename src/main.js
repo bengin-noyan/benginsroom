@@ -152,7 +152,7 @@ renderer.setAnimationLoop(() => {
   rig.update();
   lighting.update(dt);
   room.dust(dt, t);
-  furniture.update(dt, t, { channel: tv.current });
+  furniture.update(dt, t);
   interaction.update(dt, t);
   tv.update(dt);
   document.body.classList.toggle('tv-front', tv.isViewedHeadOn(camera));
