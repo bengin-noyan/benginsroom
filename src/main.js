@@ -6,7 +6,6 @@ import { TV } from './tv.js';
 import { Interaction } from './interaction.js';
 import { CameraRig } from './camera.js';
 import { channels } from './channels/index.js';
-import './style.css';
 
 const app = document.getElementById('app');
 const tooltip = document.getElementById('tooltip');
