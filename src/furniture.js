@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { canvasTexture, mulberry32 } from './utils.js';
 import { currentHour, daylightAt } from './daylight.js';
-import { fetchWeather } from './services/weather.js';
+import { fetchWeather, precipitation } from './services/weather.js';
 import { config } from './config.js';
 
 const std = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.75, ...o });
@@ -282,13 +282,6 @@ function windowObj() {
   g.add(box(W, 0.04, 0.05, frame, [0, 0.18, 0.03]));
   g.add(box(W + 0.34, 0.04, 0.24, frame, [0, -H / 2 - 0.1, 0.1]));
 
-  const curtainMat = std('#b85c38', { roughness: 1, side: THREE.DoubleSide });
-  for (const side of [-1, 1]) {
-    for (let i = 0; i < 5; i++) {
-      const fold = cyl(0.045, 0.05, H + 0.5, curtainMat, [side * (W / 2 + 0.12 + i * 0.065), 0.0, 0.16 + (i % 2) * 0.03], 10);
-      g.add(fold);
-    }
-  }
   const rod = cyl(0.015, 0.015, W + 1.0, std('#2b2420', { metalness: 0.5 }), [0, H / 2 + 0.26, 0.17], 10);
   rod.rotation.z = Math.PI / 2;
   g.add(rod);
@@ -296,15 +289,55 @@ function windowObj() {
   g.position.set(-3.985, 1.62, -1.0);
   g.rotation.y = Math.PI / 2;
 
+  // Perde ayrı bir eşya: kapanınca kıvrımlar pencerenin ortasına kayar ve genişleyerek camı örter.
+  const curtain = new THREE.Group();
+  curtain.position.copy(g.position);
+  curtain.rotation.copy(g.rotation);
+  const curtainMat = std('#b85c38', { roughness: 1, side: THREE.DoubleSide });
+  const folds = [];
+  for (const side of [-1, 1]) {
+    for (let i = 0; i < 5; i++) {
+      const fold = cyl(0.045, 0.05, H + 0.5, curtainMat, [0, 0, 0.16 + (i % 2) * 0.03], 10);
+      fold.userData.open = side * (W / 2 + 0.12 + i * 0.065);
+      fold.userData.closed = side * (0.04 + (i * (W / 2 + 0.08)) / 4);
+      folds.push(fold);
+      curtain.add(fold);
+    }
+  }
+  let closed = false;
+  let shade = 0;
+
+  // Yağmur sesi: Web Audio ile süzülmüş beyaz gürültü; ses dosyası gerekmez.
+  let rainLevel = 0;
+  let wantSound = false;
+  let rainGain = null;
+  const startRain = () => {
+    if (!wantSound || !rainLevel || rainGain) return;
+    const ctx = new AudioContext();
+    const buf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    src.loop = true;
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 1200;
+    rainGain = ctx.createGain();
+    rainGain.gain.value = 0;
+    src.connect(filter).connect(rainGain).connect(ctx.destination);
+    src.start();
+  };
+
   fetchWeather()
     .then((d) => {
       const c = d.current ?? {};
-      const code = c.weather_code ?? 0;
+      const { rain, snow } = precipitation(c.weather_code);
       sky.uniforms.cloud.value = (c.cloud_cover ?? 20) / 100;
-      // WMO kodları: 51-57 çisenti, 61-67 / 80-82 yağmur, 95+ fırtına, 71-77 / 85-86 kar
-      if (code >= 51 && code <= 57) sky.uniforms.rain.value = 0.5;
-      if ((code >= 61 && code <= 67) || (code >= 80 && code <= 82) || code >= 95) sky.uniforms.rain.value = 1;
-      if ((code >= 71 && code <= 77) || code === 85 || code === 86) sky.uniforms.snow.value = 1;
+      sky.uniforms.rain.value = rain;
+      sky.uniforms.snow.value = snow;
+      rainLevel = rain;
+      startRain();
     })
     .catch(() => {});
 
@@ -312,7 +345,26 @@ function windowObj() {
 
   return {
     group: g,
-    update(t) {
+    curtain,
+    toggleCurtain() {
+      closed = !closed;
+    },
+    get shade() {
+      return shade;
+    },
+    // Tarayıcılar sesi ancak bir tıklamadan sonra çalar; "Odaya gir" düğmesinde çağrılır.
+    startSound() {
+      wantSound = true;
+      startRain();
+    },
+    update(t, dt) {
+      shade += ((closed ? 1 : 0) - shade) * Math.min(1, dt * 3);
+      for (const f of folds) {
+        f.position.x = f.userData.open + (f.userData.closed - f.userData.open) * shade;
+        f.scale.x = 1 + shade * 1.6;
+      }
+      // Perde kapanınca yağmur sesi kısılır.
+      if (rainGain) rainGain.gain.value = 0.05 * rainLevel * (1 - shade * 0.6);
       const dl = daylightAt(currentHour());
       sky.uniforms.top.value.copy(dl.top);
       sky.uniforms.bottom.value.copy(dl.bottom);
@@ -429,21 +481,27 @@ function floorLamp() {
   g.add(light);
   g.position.set(-3.4, 0, -3.05);
 
-  let on = true;
-  let level = 1;
+  return lampSwitch(g, (level) => {
+    light.intensity = 5 * level;
+    shadeMat.emissiveIntensity = 0.6 * level;
+    bulbMat.emissiveIntensity = 2 * level;
+  });
+}
+
+// Lamba anahtarı: hava kararınca kendiliğinden yanar, aydınlanınca söner; arada ziyaretçinin seçimi geçerli.
+function lampSwitch(group, apply) {
+  let on = false;
+  let level = 0;
+  let wasDark = null;
   return {
-    group: g,
+    group,
     toggle() {
       on = !on;
     },
-    get on() {
-      return on;
-    },
-    update(dt) {
+    update(dt, dark) {
+      if (dark !== wasDark) on = wasDark = dark;
       level += ((on ? 1 : 0) - level) * Math.min(1, dt * 8);
-      light.intensity = 5 * level;
-      shadeMat.emissiveIntensity = 0.6 * level;
-      bulbMat.emissiveIntensity = 2 * level;
+      apply(level);
     },
   };
 }
@@ -571,19 +629,10 @@ function pendantLamp() {
   g.add(light);
   g.position.set(0, 0, -0.2);
 
-  let on = true;
-  let level = 1;
-  return {
-    group: g,
-    toggle() {
-      on = !on;
-    },
-    update(dt) {
-      level += ((on ? 1 : 0) - level) * Math.min(1, dt * 8);
-      light.intensity = 9 * level;
-      bulbMat.emissiveIntensity = 3 * level;
-    },
-  };
+  return lampSwitch(g, (level) => {
+    light.intensity = 9 * level;
+    bulbMat.emissiveIntensity = 3 * level;
+  });
 }
 
 function armchair() {
@@ -616,6 +665,299 @@ function sofa() {
   return g;
 }
 
+// ---------------------------------------------------------------- Kedi
+// Tekir kedi: odada mobilyalara çarpmayan bir rotada gezinir, yer yer oturup yalanır, güneş vuran yerde uyur,
+// uyanınca gerinir. Dokununca oturup sana bakar. Duruşlar eklem açılarıyla (radyan) tanımlı ve yumuşakça
+// birbirine geçer. Açılarda + bacağı öne, kuyruğu arkaya, başı yukarı döndürür.
+// f/r: ön/arka bacak, U/L: üst/alt parça.
+const CAT_POSES = {
+  stand: { hip: 0.17, pitch: 0, fU: 0.05, fL: -0.05, rU: 0.35, rL: -0.7, head: 0.05, headY: 0, eyes: 1, tailBase: 1.15, tailUp: -0.16, tailSide: 0 },
+  sit: { hip: 0.055, pitch: 0.55, fU: -0.55, fL: 0, rU: 0.9, rL: -3.0, head: -0.4, headY: 0, eyes: 1, tailBase: 1.3, tailUp: 0.02, tailSide: 0.3 },
+  sleep: { hip: 0.05, pitch: 0, fU: 1.5, fL: -3.0, rU: 1.45, rL: -3.0, head: -0.15, headY: -0.035, eyes: 0.08, tailBase: 1.6, tailUp: 0, tailSide: 0.5 },
+  stretch: { hip: 0.15, pitch: -0.3, fU: 1.1, fL: 0.2, rU: 0.2, rL: -0.5, head: 0.35, headY: 0, eyes: 0.5, tailBase: 0.4, tailUp: -0.05, tailSide: 0 },
+};
+CAT_POSES.groom = CAT_POSES.look = CAT_POSES.sit;
+const CAT_ROUTE = [
+  { x: -2.0, z: -1.1, act: 'sleep', time: 14 }, // pencereden giren güneşin düştüğü yer
+  { x: -1.7, z: -2.45 },
+  { x: 1.6, z: -2.45, act: 'groom', time: 5 },
+  { x: 2.4, z: -1.4, act: 'sit', time: 3 },
+  { x: 1.6, z: -0.15 },
+  { x: -1.6, z: -0.15 },
+];
+const VIEWER = { x: 0, z: 3.35 }; // genel görünüm kamerası; kedi dokununca buraya bakar
+const STRIDE = 0.24; // bir adım döngüsünde alınan yol; patiler yerde kaymasın diye adımlar yola bağlı
+
+// Tekir deseni. Doku yatayda gövdenin çevresini sarar: u=0.25 karın (krem), u=0.75 sırt (koyu).
+// Çizgiler sırtta kalın, karna doğru incelir.
+function tabbyTexture() {
+  const rand = mulberry32(5);
+  return canvasTexture(256, 256, (g, w, h) => {
+    g.fillStyle = '#cf8a4a';
+    g.fillRect(0, 0, w, h);
+    g.filter = 'blur(2px)';
+    g.fillStyle = 'rgba(132, 70, 28, 0.6)';
+    for (let i = 0; i < 14; i++) {
+      const y = (i + rand() * 0.5) * (h / 14);
+      const base = 5 + rand() * 4;
+      for (let x = 0; x < w; x += 4) {
+        const back = 0.5 - 0.5 * Math.cos(2 * Math.PI * (x / w - 0.25));
+        g.fillRect(x, y + Math.sin(x * 0.04 + i * 1.7) * 5, 4, base * (0.15 + 0.85 * back));
+      }
+    }
+    const shade = g.createLinearGradient(0, 0, w, 0);
+    shade.addColorStop(0.08, 'rgba(244, 222, 190, 0)');
+    shade.addColorStop(0.25, 'rgba(244, 222, 190, 0.92)');
+    shade.addColorStop(0.42, 'rgba(244, 222, 190, 0)');
+    shade.addColorStop(0.6, 'rgba(110, 55, 20, 0)');
+    shade.addColorStop(0.75, 'rgba(110, 55, 20, 0.35)');
+    shade.addColorStop(0.9, 'rgba(110, 55, 20, 0)');
+    g.filter = 'none';
+    g.fillStyle = shade;
+    g.fillRect(0, 0, w, h);
+  });
+}
+
+// Kuyruk dokusu: yatayda kuyruğun boyu; halkalar ve koyu uç.
+function tailTexture() {
+  return canvasTexture(256, 32, (g, w, h) => {
+    g.fillStyle = '#cf8a4a';
+    g.fillRect(0, 0, w, h);
+    g.filter = 'blur(2px)';
+    g.fillStyle = 'rgba(132, 70, 28, 0.7)';
+    for (let x = 18; x < w * 0.85; x += 26) g.fillRect(x, 0, 9, h);
+    g.fillStyle = '#8f4f22';
+    g.fillRect(w * 0.86, 0, w, h);
+  });
+}
+
+function cat() {
+  const furOpts = { roughness: 0.9, sheen: 1, sheenRoughness: 0.6, sheenColor: new THREE.Color('#ffcf9a') };
+  const fur = new THREE.MeshPhysicalMaterial({ map: tabbyTexture(), ...furOpts });
+  const face = new THREE.MeshPhysicalMaterial({ color: '#cf8a4a', ...furOpts });
+  const tip = new THREE.MeshPhysicalMaterial({ color: '#8f4f22', ...furOpts });
+  const cream = new THREE.MeshPhysicalMaterial({ color: '#f3dfc4', ...furOpts });
+  const pink = std('#d98c8c', { roughness: 0.6 });
+  const dark = std('#140f0b', { roughness: 0.3 });
+  const eyeMat = std('#b8c43c', { emissive: '#2c300c', roughness: 0.15 });
+
+  // Kökün +x yönü kedinin önü; gövdenin dönme noktası arka kalça.
+  const root = new THREE.Group();
+  const torso = new THREE.Group();
+  torso.position.x = -0.12;
+  root.add(torso);
+
+  // Gövde yandan bakınca kedi silueti: yuvarlak kalça, ince bel, derin göğüs.
+  const profile = [[0, -0.03], [0.045, -0.02], [0.068, 0], [0.074, 0.05], [0.064, 0.12], [0.072, 0.19], [0.068, 0.25], [0.05, 0.29], [0.03, 0.31], [0, 0.315]];
+  const body = mesh(new THREE.LatheGeometry(profile.map(([r, y]) => new THREE.Vector2(r, y)), 32), fur, [-0.03, 0.02, 0]);
+  body.rotation.z = -Math.PI / 2;
+  body.scale.z = 0.78;
+  torso.add(body);
+  const neck = mesh(new THREE.SphereGeometry(0.045, 16, 12), face, [0.26, 0.05, 0]);
+  neck.scale.set(1.2, 1, 0.9);
+  torso.add(neck);
+
+  const leg = (x, z, upper, lower, thick) => {
+    const top = new THREE.Group();
+    top.position.set(x, 0, z);
+    const thigh = mesh(new THREE.CapsuleGeometry(thick, upper, 4, 10), fur, [0, -upper / 2, 0]);
+    // Kalça / omuz kası: bacağın üstünü gövdeyle kaynaştırır.
+    const muscle = mesh(new THREE.SphereGeometry(thick * 1.6, 14, 10), face, [0, -upper * 0.25, 0]);
+    muscle.scale.set(1, 1.25, 0.55);
+    top.add(thigh, muscle);
+    const knee = new THREE.Group();
+    knee.position.y = -upper;
+    top.add(knee);
+    knee.add(mesh(new THREE.CapsuleGeometry(thick * 0.7, lower, 4, 10), fur, [0, -lower / 2, 0]));
+    const paw = mesh(new THREE.SphereGeometry(0.016, 12, 8), cream, [0.007, -lower - 0.004, 0]);
+    paw.scale.set(1.4, 0.55, 1.1);
+    knee.add(paw);
+    torso.add(top);
+    return { top, knee };
+  };
+  const front = [leg(0.22, -0.032, 0.08, 0.075, 0.021), leg(0.22, 0.032, 0.08, 0.075, 0.021)];
+  const rear = [leg(0.02, -0.032, 0.09, 0.085, 0.026), leg(0.02, 0.032, 0.09, 0.085, 0.026)];
+
+  const head = new THREE.Group();
+  head.rotation.order = 'YZX'; // önce başını kaldırır, sonra yana çevirir
+  head.position.set(0.28, 0.07, 0);
+  head.scale.setScalar(0.9);
+  torso.add(head);
+  const skull = mesh(new THREE.SphereGeometry(0.052, 24, 18), face, [0.03, 0.02, 0]);
+  skull.scale.set(1, 0.88, 1.12);
+  head.add(skull);
+  for (const z of [-0.03, 0.03]) head.add(mesh(new THREE.SphereGeometry(0.024, 14, 10), face, [0.032, -0.012, z * 0.9]));
+  for (const z of [-0.012, 0.012]) head.add(mesh(new THREE.SphereGeometry(0.016, 12, 10), cream, [0.074, -0.012, z]));
+  head.add(mesh(new THREE.SphereGeometry(0.013, 10, 8), cream, [0.066, -0.03, 0]));
+  const nose = mesh(new THREE.SphereGeometry(0.007, 10, 8), pink, [0.088, 0, 0]);
+  nose.scale.set(0.7, 0.6, 1.1);
+  head.add(nose);
+  const eyes = [-0.024, 0.024].map((z) => {
+    const e = mesh(new THREE.SphereGeometry(0.013, 14, 10), eyeMat, [0.072, 0.012, z]);
+    e.scale.set(0.6, 0.85, 1);
+    e.rotation.y = -Math.sign(z) * 0.35;
+    e.add(mesh(new THREE.BoxGeometry(0.004, 0.02, 0.005), dark, [0.012, 0, 0]));
+    head.add(e);
+    return e;
+  });
+  const ears = [-0.03, 0.03].map((z) => {
+    const ear = new THREE.Group();
+    ear.position.set(0.015, 0.066, z);
+    ear.rotation.x = Math.sign(z) * 0.3; // dışa doğru eğik
+    const outer = mesh(new THREE.ConeGeometry(0.022, 0.045, 12), face);
+    outer.scale.x = 0.45;
+    const inner = mesh(new THREE.ConeGeometry(0.014, 0.032, 10), pink, [0.006, -0.004, 0]);
+    inner.scale.x = 0.3;
+    ear.add(outer, inner);
+    head.add(ear);
+    return ear;
+  });
+  // Bıyıklar: her yanda üç ince çizgi.
+  const whisker = [];
+  for (const s of [-1, 1]) {
+    for (const dy of [-0.012, 0, 0.012]) whisker.push(0.08, -0.012, s * 0.02, 0.06, -0.012 + dy * 1.6, s * 0.095);
+  }
+  const wGeo = new THREE.BufferGeometry();
+  wGeo.setAttribute('position', new THREE.Float32BufferAttribute(whisker, 3));
+  head.add(new THREE.LineSegments(wGeo, new THREE.LineBasicMaterial({ color: '#f6efe2', transparent: true, opacity: 0.75 })));
+
+  // Kuyruk iskeleti iç içe 11 eklem: her eklemin açısı bir öncekine eklenir, böylece kıvrılabilir.
+  // Görünen kuyruk, eklemlerden geçen ve uca doğru incelen tek bir tüp; her karede yeniden kurulur.
+  const tail = new THREE.Group();
+  tail.position.set(-0.055, 0.04, 0);
+  torso.add(tail);
+  const segs = [];
+  let parent = tail;
+  for (let i = 0; i < 11; i++) {
+    const s = new THREE.Group();
+    s.position.y = i ? 0.026 : 0;
+    parent.add(s);
+    segs.push(s);
+    parent = s;
+  }
+  const tailMat = new THREE.MeshPhysicalMaterial({ map: tailTexture(), ...furOpts });
+  const tailMesh = mesh(new THREE.BufferGeometry(), tailMat);
+  tail.add(tailMesh);
+  const tipCap = mesh(new THREE.SphereGeometry(0.0078, 8, 6), tip);
+  tail.add(tipCap);
+  const toTail = new THREE.Matrix4();
+  const buildTail = () => {
+    root.updateMatrixWorld(true);
+    toTail.copy(tail.matrixWorld).invert();
+    const curve = new THREE.CatmullRomCurve3(segs.map((s) => new THREE.Vector3().setFromMatrixPosition(s.matrixWorld).applyMatrix4(toTail)));
+    const N = 24;
+    const geo = new THREE.TubeGeometry(curve, N, 1, 8);
+    const p = geo.attributes.position;
+    const c = new THREE.Vector3();
+    const v = new THREE.Vector3();
+    for (let j = 0; j <= N; j++) {
+      curve.getPointAt(j / N, c);
+      const r = 0.017 * (1 - 0.55 * (j / N));
+      for (let i = 0; i <= 8; i++) {
+        const idx = j * 9 + i;
+        v.fromBufferAttribute(p, idx).sub(c).multiplyScalar(r).add(c);
+        p.setXYZ(idx, v.x, v.y, v.z);
+      }
+    }
+    tailMesh.geometry.dispose();
+    tailMesh.geometry = geo;
+    tipCap.position.copy(c);
+  };
+
+  const pose = { ...CAT_POSES.sleep };
+  const pos = new THREE.Vector2(CAT_ROUTE[0].x, CAT_ROUTE[0].z);
+  let state = 'sleep';
+  let timer = 8;
+  let target = 1;
+  let heading = 0;
+  let walk = 0;
+  let phase = 0;
+  let yaw = 0;
+  const wrap = (a) => Math.atan2(Math.sin(a), Math.cos(a));
+
+  return {
+    group: root,
+    get hint() {
+      return state === 'sleep' ? 'Uyuyor · sev' : 'Sev';
+    },
+    poke() {
+      state = 'look';
+      timer = 3.5;
+    },
+    update(dt, t) {
+      timer -= dt;
+      if (state === 'walk') {
+        const wp = CAT_ROUTE[target];
+        const dx = wp.x - pos.x;
+        const dz = wp.z - pos.y;
+        const dist = Math.hypot(dx, dz);
+        if (dist < 0.02) {
+          if (wp.act) {
+            state = wp.act;
+            timer = wp.time;
+          }
+          target = (target + 1) % CAT_ROUTE.length;
+        } else {
+          // Önce hedefe döner, döndükçe hızlanır.
+          const turn = wrap(Math.atan2(-dz, dx) - heading);
+          const spin = THREE.MathUtils.clamp(turn, -2.5 * dt, 2.5 * dt);
+          heading += spin;
+          const step = Math.min(dist, 0.26 * dt * Math.max(0, Math.cos(turn)));
+          pos.x += (dx / dist) * step;
+          pos.y += (dz / dist) * step;
+          phase += (step / STRIDE) * Math.PI * 2 + Math.abs(spin) * 2;
+        }
+      } else if (timer <= 0) {
+        state = state === 'sleep' ? 'stretch' : 'walk';
+        timer = 2;
+      }
+
+      const k = Math.min(1, dt * 3);
+      const goal = CAT_POSES[state === 'walk' ? 'stand' : state];
+      for (const key in goal) pose[key] += (goal[key] - pose[key]) * k;
+      walk += ((state === 'walk' ? 1 : 0) - walk) * k;
+      const lookYaw =
+        state === 'look' ? THREE.MathUtils.clamp(wrap(Math.atan2(-(VIEWER.z - pos.y), VIEWER.x - pos.x) - heading), -1.3, 1.3) : 0;
+      // Uyurken başını yana, kıvrılmış gövdesine yaslar; yalanırken patisine döner.
+      const restYaw = { sleep: -0.6, groom: -0.3 }[state] ?? lookYaw;
+      yaw += (restYaw - yaw) * k;
+
+      root.position.set(pos.x, 0, pos.y);
+      root.rotation.y = heading;
+      torso.position.y = pose.hip + Math.sin(phase * 2) * 0.004 * walk;
+      torso.rotation.z = pose.pitch;
+      body.scale.x = 1 + Math.sin(t * (state === 'sleep' ? 1.6 : 2.4)) * 0.025; // nefes
+
+      // Yürüyüş sırası: sol arka, sol ön, sağ arka, sağ ön. Bacak öne giderken diz bükülüp pati kalkar.
+      const legs = [[rear[0], 0, 'r'], [front[0], 0.5, 'f'], [rear[1], 1, 'r'], [front[1], 1.5, 'f']];
+      for (const [l, off, side] of legs) {
+        const p = phase + off * Math.PI;
+        l.top.rotation.z = pose[side + 'U'] + Math.sin(p) * 0.4 * walk;
+        l.knee.rotation.z = pose[side + 'L'] - Math.max(0, Math.cos(p)) * 0.7 * walk;
+      }
+      // Yalanma: sağ ön pati ağza kalkar, baş patiye eğilip iner kalkar.
+      const groom = state === 'groom' ? 1 : 0;
+      front[1].top.rotation.z += groom * 1.7;
+      front[1].knee.rotation.z += groom * -2.2;
+      head.rotation.z = pose.head - pose.pitch * walk + groom * (-0.5 + Math.sin(t * 9) * 0.15);
+      head.rotation.y = yaw;
+      head.position.y = 0.07 + pose.headY;
+      const blink = t % 4.3 < 0.12 ? 0.1 : 1;
+      eyes.forEach((e) => (e.scale.y = 0.85 * Math.min(pose.eyes, blink)));
+      // Ara sıra bir kulak geriye seğirir.
+      ears[0].rotation.z = t % 5.7 < 0.15 ? -0.5 : 0;
+      tail.rotation.z = pose.tailBase;
+      const swish = state === 'look' ? 0.25 : 0.07;
+      segs.forEach((s, i) => {
+        if (!i) return;
+        s.rotation.z = pose.tailUp * (i / 5);
+        s.rotation.x = pose.tailSide + Math.sin(t * (state === 'look' ? 6 : 1.8) - i * 0.45) * swish * (i / 10);
+      });
+      buildTail();
+    },
+  };
+}
+
 // ---------------------------------------------------------------- Kurulum
 export function buildFurniture(scene) {
   const player = recordPlayer();
@@ -624,6 +966,7 @@ export function buildFurniture(scene) {
   const lamp = floorLamp();
   const pot = plant();
   const pendant = pendantLamp();
+  const kitty = cat();
 
   // Ortadaki kanepe TV'ye bakar; sehpadaki oyun kolu ve telefonu genel görünümde örtmesin diye geride durur.
   const couch = sofa();
@@ -652,18 +995,33 @@ export function buildFurniture(scene) {
     { id: 'phone', label: 'Telefon', hint: 'İletişim', channel: 'contact', object: phone() },
     { id: 'lamp', label: 'Lamba', hint: 'Aç / kapat', action: () => lamp.toggle(), object: lamp.group },
     { id: 'pendant', label: 'Tavan lambası', hint: 'Aç / kapat', action: () => pendant.toggle(), object: pendant.group },
+    { id: 'curtain', label: 'Perde', hint: 'Aç / kapat', action: () => win.toggleCurtain(), object: win.curtain },
+    {
+      id: 'cat',
+      label: 'Kedi',
+      get hint() {
+        return kitty.hint;
+      },
+      action: () => kitty.poke(),
+      object: kitty.group,
+    },
     { id: 'plant', label: 'Bitki', hint: 'Dokun', action: () => pot.poke(), object: pot.group },
   ];
   items.forEach((i) => scene.add(i.object));
 
   return {
     items,
-    update(dt, t) {
+    get shade() {
+      return win.shade;
+    },
+    startSound: () => win.startSound(),
+    update(dt, t, dark) {
       player.update(dt);
-      win.update(t);
+      win.update(t, dt);
       clock.update();
-      lamp.update(dt);
-      pendant.update(dt);
+      lamp.update(dt, dark);
+      pendant.update(dt, dark);
+      kitty.update(dt, t);
       pot.update(dt, t);
     },
   };

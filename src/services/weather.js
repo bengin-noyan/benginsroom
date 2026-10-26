@@ -31,6 +31,14 @@ const CODES = [
   [[95, 96, 99], 'Fırtına', '⛈️'],
 ];
 
+// WMO kodundan yağış şiddeti (0-1): 51-57 çisenti, 61-67 / 80-82 yağmur, 95+ fırtına, 71-77 / 85-86 kar.
+export function precipitation(code = 0) {
+  return {
+    rain: code >= 51 && code <= 57 ? 0.5 : (code >= 61 && code <= 67) || (code >= 80 && code <= 82) || code >= 95 ? 1 : 0,
+    snow: (code >= 71 && code <= 77) || code === 85 || code === 86 ? 1 : 0,
+  };
+}
+
 export function describeWeather(code, isDay = 1) {
   const hit = CODES.find(([codes]) => codes.includes(code));
   if (!hit) return { text: 'Bilinmiyor', icon: '🌡️' };

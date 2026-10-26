@@ -84,6 +84,7 @@ function tvView() {
 let focused = false;
 function focusTV() {
   focused = true;
+  rig.keysEnabled = false;
   backBtn.hidden = false;
   hint.classList.add('hidden');
   const v = tvView();
@@ -92,6 +93,7 @@ function focusTV() {
 function leaveTV() {
   if (!focused) return;
   focused = false;
+  rig.keysEnabled = true;
   backBtn.hidden = true;
   rig.flyTo(OVERVIEW.pos, OVERVIEW.target, 1.3);
 }
@@ -143,6 +145,8 @@ document.getElementById('enter').addEventListener('click', () => {
   document.body.classList.add('entered');
   rig.flyTo(OVERVIEW.pos, OVERVIEW.target, 2.6);
   interaction.enabled = true;
+  rig.keysEnabled = true;
+  furniture.startSound();
   setTimeout(() => tv.show('menu'), 1400);
 });
 
@@ -162,9 +166,9 @@ renderer.setAnimationLoop(() => {
   const dt = Math.min(clock.getDelta(), 0.1);
   const t = clock.elapsedTime;
   rig.update();
-  lighting.update(dt);
+  lighting.update(dt, furniture.shade);
   room.dust(dt, t);
-  furniture.update(dt, t);
+  furniture.update(dt, t, lighting.state.dark);
   interaction.update(dt, t);
   tv.update(dt);
   document.body.classList.toggle('tv-front', tv.isViewedHeadOn(camera));

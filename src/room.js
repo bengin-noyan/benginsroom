@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { canvasTexture, mulberry32 } from './utils.js';
 import { currentHour, daylightAt } from './daylight.js';
+import { fetchWeather, precipitation } from './services/weather.js';
 
 export const ROOM = { w: 8, h: 3.2, d: 7, back: -3.5, front: 3.5 };
 
@@ -180,19 +181,34 @@ export function buildLighting(scene) {
   sun.shadow.radius = 3;
   scene.add(sun, sun.target);
 
+  // Bulutlu ve yağışlı havada içerisi loşlaşır (0 açık hava, 1 en kasvetli).
+  let gloom = 0;
+  fetchWeather()
+    .then((d) => {
+      const c = d.current ?? {};
+      const { rain, snow } = precipitation(c.weather_code);
+      gloom = Math.min(1, ((c.cloud_cover ?? 0) / 100) * 0.5 + Math.max(rain, snow) * 0.5);
+    })
+    .catch(() => {});
+
   let acc = 1;
-  const state = { daylight: daylightAt(currentHour()) };
+  const state = { daylight: daylightAt(currentHour()), dark: false };
   return {
     state,
-    update(dt) {
+    // shade: perdenin kapalılığı (0 açık, 1 kapalı); perde her karede değişebildiği için ışık her karede güncellenir.
+    update(dt, shade = 0) {
       acc += dt;
-      if (acc < 1) return;
-      acc = 0;
-      const dl = daylightAt(currentHour());
-      state.daylight = dl;
+      if (acc >= 1) {
+        acc = 0;
+        state.daylight = daylightAt(currentHour());
+      }
+      const dl = state.daylight;
+      const outside = dl.sunIntensity * (1 - gloom * 0.6);
       sun.color.copy(dl.sun);
-      sun.intensity = dl.sunIntensity;
-      hemi.intensity = dl.ambient;
+      sun.intensity = outside * (1 - shade * 0.9);
+      hemi.intensity = dl.ambient * (1 - gloom * 0.3) * (1 - shade * 0.4);
+      // Lambaların kendiliğinden yanma eşiği: ~19:20'den sonra ve ~06:00'dan önce, kapalı havada daha erken.
+      state.dark = outside < 1.5;
     },
   };
 }

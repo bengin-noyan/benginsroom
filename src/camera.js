@@ -2,7 +2,15 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { easeInOutCubic } from './utils.js';
 
-const BOUNDS = new THREE.Box3(new THREE.Vector3(-3.7, 0.3, -3.1), new THREE.Vector3(3.7, 3.0, 3.4));
+// Tuş → [sağa/sola, yukarı/aşağı] bakış yönü.
+const LOOK_KEYS = {
+  KeyA: [1, 0], ArrowLeft: [1, 0],
+  KeyD: [-1, 0], ArrowRight: [-1, 0],
+  KeyW: [0, 1], ArrowUp: [0, 1],
+  KeyS: [0, -1], ArrowDown: [0, -1],
+};
+
+const BOUNDS =new THREE.Box3(new THREE.Vector3(-3.7, 0.3, -3.1), new THREE.Vector3(3.7, 3.0, 3.4));
 
 // Serbest bakış (sınırlandırılmış orbit) + noktalar arası yumuşak uçuş.
 export class CameraRig {
@@ -24,6 +32,18 @@ export class CameraRig {
     });
     this.controls.enabled = false;
     this.tween = null;
+
+    // Klavyeyle bakınma (WASD / yön tuşları). TV açıkken kapalı: yılan oyunu da bu tuşları kullanıyor.
+    this.keysEnabled = false;
+    this.keys = new Set();
+    this.lastTime = performance.now();
+    addEventListener('keydown', (e) => {
+      if (!this.keysEnabled || !(e.code in LOOK_KEYS)) return;
+      e.preventDefault();
+      this.keys.add(e.code);
+    });
+    addEventListener('keyup', (e) => this.keys.delete(e.code));
+    addEventListener('blur', () => this.keys.clear());
   }
 
   jump(pos, target) {
@@ -47,6 +67,24 @@ export class CameraRig {
 
   // Uçuş gerçek saate bağlı: yavaş cihazda kare düşse de süre değişmez.
   update() {
+    const now = performance.now();
+    const dt = Math.min(0.1, (now - this.lastTime) / 1000);
+    this.lastTime = now;
+    if (this.keysEnabled && this.controls.enabled && this.keys.size) {
+      let yaw = 0;
+      let pitch = 0;
+      for (const code of this.keys) {
+        const [dy, dp] = LOOK_KEYS[code] ?? [0, 0];
+        yaw += dy;
+        pitch += dp;
+      }
+      // Kamera hedefin etrafında döner; sınırları OrbitControls.update uygular.
+      const offset = this.camera.position.clone().sub(this.controls.target);
+      const s = new THREE.Spherical().setFromVector3(offset);
+      s.theta += yaw * 1.2 * dt;
+      s.phi += pitch * 0.9 * dt;
+      this.camera.position.copy(this.controls.target).add(offset.setFromSpherical(s));
+    }
     if (this.tween) {
       const tw = this.tween;
       tw.t = Math.min(1, (performance.now() - tw.start) / 1000 / tw.duration);

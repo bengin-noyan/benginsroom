@@ -69,6 +69,14 @@ export const config = {
     },
   ],
 
+  // Portföyde veren kurum ve tarih yazmıyor; eklenirse `org` ve `date` alanları kanalda görünür.
+  certificates: [
+    { name: 'The Complete Full-Stack Web Development Bootcamp' },
+    { name: 'Uygulamalarla SQL Öğreniyorum' },
+    { name: 'Versiyon Kontrolleri: Git ve GitHub' },
+    { name: 'Go ile Programlamaya Giriş' },
+  ],
+
   projects: [
     {
       name: 'DentalPro',

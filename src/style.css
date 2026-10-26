@@ -76,6 +76,20 @@ button { font: inherit; color: inherit; cursor: pointer; }
   transition: background 0.2s, transform 0.2s;
 }
 .intro button:hover { background: rgba(255, 180, 106, 0.28); transform: translateY(-1px); }
+.intro-simple { display: block; margin-top: 18px; font-size: 13px; color: var(--ink-dim); }
+
+/* ---------------------------------------------------------------- Basit görünüm (?basit ya da WebGL yoksa) */
+html.simple, html.simple body { height: auto; overflow: auto; }
+.simple-page { max-width: 760px; margin: 0 auto; padding: 48px 16px 64px; line-height: 1.6; }
+.simple-page header { display: flex; gap: 20px; align-items: center; }
+.simple-page img { width: 96px; height: 96px; border-radius: 20px; object-fit: cover; }
+.simple-page h1 { margin: 0; }
+.simple-page h2 { margin: 40px 0 0; font-size: 20px; color: var(--warm); }
+.simple-page h3 { margin: 20px 0 0; font-size: 17px; }
+.simple-page a { color: var(--warm); }
+.simple-page dt { margin-top: 12px; font-weight: 700; }
+.simple-page dd { margin: 0; color: var(--ink-dim); }
+.simple-meta { margin: 0; font-size: 14px; color: var(--ink-dim); }
 
 .back {
   position: fixed;

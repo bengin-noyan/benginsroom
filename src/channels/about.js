@@ -6,6 +6,7 @@ const TABS = [
   ['intro', 'Hakkımda'],
   ['experience', 'Deneyim'],
   ['skills', 'Yetenekler'],
+  ['certificates', 'Sertifikalar'],
 ];
 
 export function mount(host) {
@@ -48,6 +49,18 @@ export function mount(host) {
         <dl class="skills">
           ${config.skills.map((s) => `<dt>${esc(s.group)}</dt><dd>${s.items.map(esc).join(' · ')}</dd>`).join('')}
         </dl>
+      </section>
+
+      <section data-panel="certificates" hidden>
+        ${config.certificates
+          .map(
+            (c) => `
+          <div class="xp">
+            <div class="xp-role">${esc(c.name)}</div>
+            ${c.org || c.date ? `<div class="xp-meta">${[c.org, c.date].filter(Boolean).map(esc).join(' · ')}</div>` : ''}
+          </div>`,
+          )
+          .join('')}
       </section>
     </div>`;
 
