@@ -204,6 +204,10 @@ const skyFragment = /* glsl */ `
   uniform float stars;
   uniform float time;
   uniform float cloud;
+  uniform float rain;
+  uniform float snow;
+  uniform vec2 sunPos;
+  uniform vec3 sunCol;
   varying vec2 vUv;
   float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
   float noise(vec2 p) {
@@ -216,6 +220,9 @@ const skyFragment = /* glsl */ `
     vec2 sc = floor(vUv * vec2(150.0, 130.0));
     float star = step(0.995, hash(sc)) * stars * (0.55 + 0.45 * sin(time * 2.0 + hash(sc) * 40.0));
     col += vec3(star);
+    // Güneş (gündüz) ya da ay (gece); bulut arttıkça soluklaşır
+    float sd = length((vUv - sunPos) * vec2(1.15, 1.0));
+    col += sunCol * (smoothstep(0.065, 0.055, sd) + 0.3 * smoothstep(0.3, 0.0, sd)) * (1.0 - 0.85 * cloud);
     float n = noise(vUv * vec2(4.0, 3.0) + vec2(time * 0.02, 0.0)) * 0.6
             + noise(vUv * vec2(9.0, 6.0) + vec2(time * 0.035, 0.0)) * 0.4;
     float cl = smoothstep(0.62 - cloud * 0.45, 0.9, n) * (0.35 + cloud * 0.65);
@@ -230,6 +237,16 @@ const skyFragment = /* glsl */ `
       float lit = step(0.72, hash(wc)) * step(0.45, fract(vUv.x * 110.0)) * step(0.4, fract(vUv.y * 70.0));
       col += vec3(1.0, 0.78, 0.42) * lit * (0.15 + stars * 0.8);
     }
+    // Yağmur: hafif eğik düşen çizgiler
+    vec2 rp = vUv * vec2(70.0, 5.0) + vec2(vUv.y * 2.0, time * 6.0);
+    vec2 rf = fract(rp);
+    float drop = step(0.55, hash(floor(rp))) * step(abs(rf.x - 0.5), 0.05) * step(0.55, rf.y);
+    col = mix(col, vec3(0.78, 0.84, 0.95), drop * rain * 0.55);
+    // Kar: sallanarak süzülen taneler
+    vec2 sp = vUv * vec2(18.0, 14.0) + vec2(0.0, time * 0.5);
+    sp.x += sin(time * 0.8 + floor(sp.y)) * 0.3;
+    float flake = step(0.5, hash(floor(sp) + 7.0)) * smoothstep(0.13, 0.06, length(fract(sp) - 0.5));
+    col = mix(col, vec3(1.0), flake * snow);
     gl_FragColor = vec4(col, 1.0);
     #include <colorspace_fragment>
   }
@@ -245,6 +262,10 @@ function windowObj() {
       stars: { value: 0 },
       time: { value: 0 },
       cloud: { value: 0.2 },
+      rain: { value: 0 },
+      snow: { value: 0 },
+      sunPos: { value: new THREE.Vector2() },
+      sunCol: { value: new THREE.Color() },
     },
     vertexShader: skyVertex,
     fragmentShader: skyFragment,
@@ -276,8 +297,18 @@ function windowObj() {
   g.rotation.y = Math.PI / 2;
 
   fetchWeather()
-    .then((d) => (sky.uniforms.cloud.value = (d.current?.cloud_cover ?? 20) / 100))
+    .then((d) => {
+      const c = d.current ?? {};
+      const code = c.weather_code ?? 0;
+      sky.uniforms.cloud.value = (c.cloud_cover ?? 20) / 100;
+      // WMO kodları: 51-57 çisenti, 61-67 / 80-82 yağmur, 95+ fırtına, 71-77 / 85-86 kar
+      if (code >= 51 && code <= 57) sky.uniforms.rain.value = 0.5;
+      if ((code >= 61 && code <= 67) || (code >= 80 && code <= 82) || code >= 95) sky.uniforms.rain.value = 1;
+      if ((code >= 71 && code <= 77) || code === 85 || code === 86) sky.uniforms.snow.value = 1;
+    })
     .catch(() => {});
+
+  const moonCol = new THREE.Color('#cfd8f5');
 
   return {
     group: g,
@@ -287,6 +318,12 @@ function windowObj() {
       sky.uniforms.bottom.value.copy(dl.bottom);
       sky.uniforms.stars.value = dl.stars;
       sky.uniforms.time.value = t;
+      // Güneş 06-20 arası, ay 20-06 arası pencerede soldan sağa yay çizer
+      const h = currentHour();
+      const day = h >= 6 && h < 20;
+      const k = day ? (h - 6) / 14 : ((h + 4) % 24) / 10;
+      sky.uniforms.sunPos.value.set(0.12 + 0.76 * k, 0.15 + 0.7 * Math.sin(Math.PI * k));
+      sky.uniforms.sunCol.value.copy(day ? dl.sun : moonCol);
     },
   };
 }
@@ -521,11 +558,32 @@ function pendantLamp() {
   const shade = mesh(new THREE.CylinderGeometry(0.05, 0.28, 0.22, 32, 1, true), black, [0, 2.55, 0]);
   shade.castShadow = false;
   g.add(shade);
-  const bulb = mesh(new THREE.SphereGeometry(0.05, 16, 12), new THREE.MeshStandardMaterial({ emissive: '#ffd9a8', emissiveIntensity: 3 }), [0, 2.48, 0]);
+  const bulbMat = new THREE.MeshStandardMaterial({ emissive: '#ffd9a8', emissiveIntensity: 3 });
+  const bulb = mesh(new THREE.SphereGeometry(0.05, 16, 12), bulbMat, [0, 2.48, 0]);
   bulb.castShadow = false;
   g.add(bulb);
+  const light = new THREE.PointLight('#ffd2a1', 9, 0, 2);
+  light.position.set(0, 2.4, 0);
+  light.castShadow = true;
+  light.shadow.mapSize.set(1024, 1024);
+  light.shadow.bias = -0.002;
+  light.shadow.radius = 4;
+  g.add(light);
   g.position.set(0, 0, -0.2);
-  return g;
+
+  let on = true;
+  let level = 1;
+  return {
+    group: g,
+    toggle() {
+      on = !on;
+    },
+    update(dt) {
+      level += ((on ? 1 : 0) - level) * Math.min(1, dt * 8);
+      light.intensity = 9 * level;
+      bulbMat.emissiveIntensity = 3 * level;
+    },
+  };
 }
 
 function armchair() {
@@ -565,13 +623,14 @@ export function buildFurniture(scene) {
   const clock = wallClock();
   const lamp = floorLamp();
   const pot = plant();
+  const pendant = pendantLamp();
 
   // Ortadaki kanepe TV'ye bakar; sehpadaki oyun kolu ve telefonu genel görünümde örtmesin diye geride durur.
   const couch = sofa();
   couch.position.set(0, 0, 0.6);
   couch.rotation.y = Math.PI;
 
-  const decor = [tvStand(), coffeeTable(), pendantLamp(), armchair(), couch, poster()];
+  const decor = [tvStand(), coffeeTable(), armchair(), couch, poster()];
   decor.forEach((d) => scene.add(d));
 
   // Her eşya bir tetikleyici: channel → TV'de açılır, action → odada bir şey olur.
@@ -592,6 +651,7 @@ export function buildFurniture(scene) {
     { id: 'controller', label: 'Oyun kolu', hint: 'Oyna', channel: 'game', object: controller() },
     { id: 'phone', label: 'Telefon', hint: 'İletişim', channel: 'contact', object: phone() },
     { id: 'lamp', label: 'Lamba', hint: 'Aç / kapat', action: () => lamp.toggle(), object: lamp.group },
+    { id: 'pendant', label: 'Tavan lambası', hint: 'Aç / kapat', action: () => pendant.toggle(), object: pendant.group },
     { id: 'plant', label: 'Bitki', hint: 'Dokun', action: () => pot.poke(), object: pot.group },
   ];
   items.forEach((i) => scene.add(i.object));
@@ -603,6 +663,7 @@ export function buildFurniture(scene) {
       win.update(t);
       clock.update();
       lamp.update(dt);
+      pendant.update(dt);
       pot.update(dt, t);
     },
   };

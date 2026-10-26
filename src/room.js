@@ -170,15 +170,6 @@ export function buildLighting(scene) {
   const hemi = new THREE.HemisphereLight('#ffe9d2', '#3a2a22', 0.5);
   scene.add(hemi);
 
-  // Tavan sarkıt lambası
-  const pendant = new THREE.PointLight('#ffd2a1', 9, 0, 2);
-  pendant.position.set(0, 2.4, -0.2);
-  pendant.castShadow = true;
-  pendant.shadow.mapSize.set(1024, 1024);
-  pendant.shadow.bias = -0.002;
-  pendant.shadow.radius = 4;
-  scene.add(pendant);
-
   // Pencereden giren gün ışığı: pervazlar zemine gölge düşürür.
   const sun = new THREE.SpotLight('#fff1dc', 3, 0, 0.42, 0.7, 0);
   sun.position.set(-7.5, 3.6, -0.6);
