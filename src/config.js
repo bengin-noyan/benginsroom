@@ -124,6 +124,12 @@ export const config = {
     { src: 'music/chopin-nocturne-op9-2.mp3', title: 'Nocturne Op. 9 No. 2', artist: 'Frédéric Chopin' },
     { src: 'music/satie-gymnopedie-1.mp3', title: 'Gymnopédie No. 1', artist: 'Erik Satie' },
     { src: 'music/bach-cello-suite-1-prelude.mp3', title: 'Çello Süiti No. 1 · Prélude', artist: 'J. S. Bach' },
+    { src: 'music/satie-gnossienne-1.mp3', title: 'Gnossienne No. 1', artist: 'Erik Satie' },
+    { src: 'music/schumann-traumerei.mp3', title: 'Träumerei', artist: 'Robert Schumann' },
+    { src: 'music/bach-air.mp3', title: 'Air (Sol Teli Üzerine Arya)', artist: 'J. S. Bach' },
+    { src: 'music/chopin-waltz-op64-2.mp3', title: 'Vals Op. 64 No. 2', artist: 'Frédéric Chopin' },
+    { src: 'music/mozart-quartet-15-andante.mp3', title: 'Yaylı Çalgılar Dörtlüsü No. 15 · Andante', artist: 'W. A. Mozart' },
+    { src: 'music/satie-gymnopedie-3.mp3', title: 'Gymnopédie No. 3', artist: 'Erik Satie' },
   ],
 
   weather: {

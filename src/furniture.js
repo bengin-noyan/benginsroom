@@ -65,24 +65,34 @@ function recordPlayer() {
   g.add(arm);
   g.position.set(2.05, 0, -3.2);
 
-  // Her dokunuş sıradaki parçayı çalar; listenin sonundan sonra durur. Biten parça da sıradakine geçer.
+  // Dokunuş çalar / durdurur; durdurulan parça kaldığı yerden devam eder. Çift dokunuş sıradaki parçaya geçer.
+  // Biten parça sıradakine geçer, liste bitince başa döner.
   const audio = new Audio();
   let track = -1;
-  const next = () => {
-    track = track + 1 < config.music.length ? track + 1 : -1;
-    if (track < 0) return audio.pause();
+  let lastTap = 0;
+  const play = (i) => {
+    track = i % config.music.length;
     audio.src = config.music[track].src;
     audio.play().catch(() => {});
   };
-  audio.addEventListener('ended', next);
+  audio.addEventListener('ended', () => play(track + 1));
 
   return {
     group: g,
-    next,
+    toggle() {
+      // İlk dokunuş beklemeden çalar / durdurur; 350 ms içinde ikincisi gelirse sıradaki parçaya geçer.
+      const now = performance.now();
+      const double = now - lastTap < 350;
+      lastTap = double ? 0 : now;
+      if (double) play(track + 1);
+      else if (track < 0) play(0);
+      else if (audio.paused) audio.play().catch(() => {});
+      else audio.pause();
+    },
     get hint() {
       if (track < 0) return 'Müzik çal';
       const { title, artist } = config.music[track];
-      return `♪ ${title} · ${artist} — dokun: ${track + 1 < config.music.length ? 'sonraki' : 'durdur'}`;
+      return `♪ ${title} · ${artist} — dokun: ${audio.paused ? 'devam et' : 'durdur'} · çift dokun: sonraki`;
     },
     update(dt) {
       if (!audio.paused) record.rotation.y -= dt * 3.5;
@@ -986,7 +996,7 @@ export function buildFurniture(scene) {
       get hint() {
         return player.hint;
       },
-      action: () => player.next(),
+      action: () => player.toggle(),
       object: player.group,
     },
     { id: 'window', label: 'Pencere', hint: 'Hava durumu', channel: 'weather', object: win.group },
