@@ -36,6 +36,15 @@ const cssScene = new THREE.Scene();
 scene.background = new THREE.Color('#0d0b10');
 const camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.05, 50);
 
+// Dikey ekranda oda yanlardan kesilmesin: yatay görüş ~75° kalacak kadar açılır (55°–85° arası).
+function fitCamera() {
+  camera.aspect = innerWidth / innerHeight;
+  const need = THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(37.5)) / camera.aspect));
+  camera.fov = THREE.MathUtils.clamp(need, 55, 85);
+  camera.updateProjectionMatrix();
+}
+fitCamera();
+
 // ---------------------------------------------------------------- Oda
 const room = buildRoom(scene);
 const lighting = buildLighting(scene);
@@ -120,6 +129,10 @@ for (const item of items) {
   dock.appendChild(b);
 }
 
+if (matchMedia('(hover: none)').matches) {
+  hint.textContent = 'Sürükle: etrafına bak · İki parmak: yaklaş · Dokun: eşyayı kullan';
+}
+
 backBtn.addEventListener('click', leaveTV);
 addEventListener('keydown', (e) => {
   if (e.key === 'Escape') leaveTV();
@@ -134,8 +147,7 @@ document.getElementById('enter').addEventListener('click', () => {
 });
 
 addEventListener('resize', () => {
-  camera.aspect = innerWidth / innerHeight;
-  camera.updateProjectionMatrix();
+  fitCamera();
   renderer.setSize(innerWidth, innerHeight);
   cssRenderer.setSize(innerWidth, innerHeight);
   if (focused) {

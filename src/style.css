@@ -142,6 +142,22 @@ body.entered .dock { transform: none; }
 body.entered .hint { opacity: 1; }
 body.entered .hint.hidden { opacity: 0; transition-delay: 0s; }
 @media (max-width: 640px) { .hint { display: none; } }
+@media (hover: none) { .back kbd { display: none; } }
+/* 1280 px'lik TV ekranı dikey telefonda okunmayacak kadar küçülür */
+@media (orientation: portrait) and (max-width: 640px) {
+  body.tv-front::after {
+    content: 'Daha rahat okumak için telefonu yan çevir ↻';
+    position: fixed;
+    top: 20px;
+    right: 16px;
+    left: 150px;
+    z-index: 30;
+    font-size: 12px;
+    text-align: right;
+    color: var(--ink-dim);
+    pointer-events: none;
+  }
+}
 
 /* ---------------------------------------------------------------- TV ekranı (1280×720 px) */
 /* .tv-screen'e overflow verilmez: Chrome, 3B dönüşümlü öğede overflow:hidden olunca
