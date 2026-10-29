@@ -6,7 +6,7 @@ import * as time from './time.js';
 import * as game from './game.js';
 import * as contact from './contact.js';
 
-// Sıra = kanal numarası. accent, TV'nin odaya yaydığı ışığın rengi.
+// sıra = kanal numarası, accent = TV ışığının rengi
 export const channels = [
   { id: 'menu', title: 'Kanal rehberi', icon: '📺', accent: '#8fb3ff', mount: menu.mount },
   { id: 'about', title: 'Hakkımda', icon: '📚', accent: '#e9c46a', mount: about.mount },

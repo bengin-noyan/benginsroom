@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { easeInOutCubic } from './utils.js';
 
-// Tuş → [sağa/sola, yukarı/aşağı] bakış yönü.
+// tuş -> [yatay, dikey] bakış yönü
 const LOOK_KEYS = {
   KeyA: [1, 0], ArrowLeft: [1, 0],
   KeyD: [-1, 0], ArrowRight: [-1, 0],
@@ -12,7 +12,7 @@ const LOOK_KEYS = {
 
 const BOUNDS =new THREE.Box3(new THREE.Vector3(-3.7, 0.3, -3.1), new THREE.Vector3(3.7, 3.0, 3.4));
 
-// Serbest bakış (sınırlandırılmış orbit) + noktalar arası yumuşak uçuş.
+// sınırlı orbit + noktadan noktaya yumuşak geçiş
 export class CameraRig {
   constructor(camera, dom) {
     this.camera = camera;
@@ -33,7 +33,7 @@ export class CameraRig {
     this.controls.enabled = false;
     this.tween = null;
 
-    // Klavyeyle bakınma (WASD / yön tuşları). TV açıkken kapalı: yılan oyunu da bu tuşları kullanıyor.
+    // WASD / ok tuşlarıyla bakınma. TV açıkken kapalı, yılan oyunu aynı tuşları kullanıyor
     this.keysEnabled = false;
     this.keys = new Set();
     this.lastTime = performance.now();
@@ -65,7 +65,7 @@ export class CameraRig {
     this.controls.enabled = false;
   }
 
-  // Uçuş gerçek saate bağlı: yavaş cihazda kare düşse de süre değişmez.
+  // süreyi gerçek zamana bağladım, fps düşse de uçuş aynı sürede bitiyor
   update() {
     const now = performance.now();
     const dt = Math.min(0.1, (now - this.lastTime) / 1000);
@@ -78,7 +78,7 @@ export class CameraRig {
         yaw += dy;
         pitch += dp;
       }
-      // Kamera hedefin etrafında döner; sınırları OrbitControls.update uygular.
+      // hedefin etrafında dönüyor, sınırları OrbitControls.update hallediyor
       const offset = this.camera.position.clone().sub(this.controls.target);
       const s = new THREE.Spherical().setFromVector3(offset);
       s.theta += yaw * 1.2 * dt;

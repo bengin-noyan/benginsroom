@@ -2,7 +2,7 @@ import * as THREE from 'three';
 
 const HIGHLIGHT = new THREE.Color('#ffb46a').multiplyScalar(0.12);
 
-// Odadaki nesneler için hover vurgusu, ipucu balonu ve tıklama algılama.
+// hover vurgusu, ipucu balonu ve tıklama
 export class Interaction {
   constructor({ camera, scene, dom, items, tooltip, onActivate }) {
     this.camera = camera;

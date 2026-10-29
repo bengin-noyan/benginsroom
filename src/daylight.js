@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-// Günün saatine göre gökyüzü ve ışık. [saat, gök üstü, gök altı, yıldız, güneş rengi, güneş gücü, ortam ışığı]
+// saate göre gök ve ışık: [saat, gök üst, gök alt, yıldız, güneş rengi, güneş gücü, ortam]
 const KEYS = [
   [0, '#050a1c', '#121836', 1, '#6d7fb3', 0.15, 0.25],
   [5, '#0c1534', '#382a4d', 0.7, '#7d86b8', 0.2, 0.28],

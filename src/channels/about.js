@@ -1,7 +1,7 @@
 import { config } from '../config.js';
 import { esc } from '../utils.js';
 
-// Ekran kaydırılamadığı için özgeçmiş sekmelere bölünür.
+// ekran kaymadığı için özgeçmişi sekmelere böldüm
 const TABS = [
   ['intro', 'Hakkımda'],
   ['experience', 'Deneyim'],

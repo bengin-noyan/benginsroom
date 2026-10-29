@@ -1,4 +1,4 @@
-// Oyun kolundan: klasik yılan. Ok tuşları / WASD, dokunmatikte kaydır.
+// oyun kolu kanalı: yılan. ok tuşları / WASD, dokunmatikte kaydırma
 const N = 24;
 const CELL = 26;
 const KEYS = {

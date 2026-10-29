@@ -1,6 +1,6 @@
 import { config } from '../config.js';
 
-// Open-Meteo: anahtar gerektirmeyen ücretsiz hava durumu API'si.
+// Open-Meteo, anahtarsız ve ücretsiz
 const TTL = 10 * 60 * 1000;
 let cache = null;
 
@@ -31,7 +31,7 @@ const CODES = [
   [[95, 96, 99], 'Fırtına', '⛈️'],
 ];
 
-// WMO kodundan yağış şiddeti (0-1): 51-57 çisenti, 61-67 / 80-82 yağmur, 95+ fırtına, 71-77 / 85-86 kar.
+// WMO kodu -> yağış şiddeti (0-1). 51-57 çisenti, 61-67 / 80-82 yağmur, 95+ fırtına, 71-77 / 85-86 kar
 export function precipitation(code = 0) {
   return {
     rain: code >= 51 && code <= 57 ? 0.5 : (code >= 61 && code <= 67) || (code >= 80 && code <= 82) || code >= 95 ? 1 : 0,

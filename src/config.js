@@ -1,10 +1,10 @@
-// Odadaki içeriklerin tamamı buradan yönetilir.
-// Metinleri, linkleri, videoları kendi içeriğinle değiştir.
+// sitedeki bütün içerik burada
+// kanal kodlarına metin gömme, buraya ekle
 
 export const config = {
   owner: 'Bengin',
 
-  // Kaynak: bengin-portfolio.vercel.app
+  // portföyden aldım: bengin-portfolio.vercel.app
   about: {
     title: 'Bengin Noyan',
     role: 'Software Developer',
@@ -69,7 +69,7 @@ export const config = {
     },
   ],
 
-  // Portföyde veren kurum ve tarih yazmıyor; eklenirse `org` ve `date` alanları kanalda görünür.
+  // portföyde kurum/tarih yok, eklersem org ve date alanları kanalda çıkıyor
   certificates: [
     { name: 'The Complete Full-Stack Web Development Bootcamp' },
     { name: 'Uygulamalarla SQL Öğreniyorum' },
@@ -117,7 +117,7 @@ export const config = {
     },
   ],
 
-  // Plak çaların çaldığı parçalar (public/music). Kayıtlar Wikimedia Commons'tan, kamu malı (public domain).
+  // plak çaların listesi (public/music). hepsi Wikimedia Commons'tan, kamu malı
   music: [
     { src: 'music/debussy-clair-de-lune.mp3', title: 'Clair de Lune', artist: 'Claude Debussy' },
     { src: 'music/beethoven-moonlight.mp3', title: 'Ay Işığı Sonatı', artist: 'Ludwig van Beethoven' },

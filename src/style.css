@@ -30,7 +30,7 @@ body.tv-front .css-layer { z-index: 2; }
 
 button { font: inherit; color: inherit; cursor: pointer; }
 
-/* ---------------------------------------------------------------- Arayüz */
+/* --- Arayüz */
 .tooltip {
   position: fixed;
   top: 0;
@@ -78,7 +78,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .intro button:hover { background: rgba(255, 180, 106, 0.28); transform: translateY(-1px); }
 .intro-simple { display: block; margin-top: 18px; font-size: 13px; color: var(--ink-dim); }
 
-/* ---------------------------------------------------------------- Basit görünüm (?basit ya da WebGL yoksa) */
+/* --- Basit görünüm (?basit ya da WebGL yoksa) */
 html.simple, html.simple body { height: auto; overflow: auto; }
 .simple-page { max-width: 760px; margin: 0 auto; padding: 48px 16px 64px; line-height: 1.6; }
 .simple-page header { display: flex; gap: 20px; align-items: center; }
@@ -157,7 +157,7 @@ body.entered .hint { opacity: 1; }
 body.entered .hint.hidden { opacity: 0; transition-delay: 0s; }
 @media (max-width: 640px) { .hint { display: none; } }
 @media (hover: none) { .back kbd { display: none; } }
-/* 1280 px'lik TV ekranı dikey telefonda okunmayacak kadar küçülür */
+/* dikey telefonda 1280 px'lik ekran okunmayacak kadar küçülüyor */
 @media (orientation: portrait) and (max-width: 640px) {
   body.tv-front::after {
     content: 'Daha rahat okumak için telefonu yan çevir ↻';
@@ -173,9 +173,9 @@ body.entered .hint.hidden { opacity: 0; transition-delay: 0s; }
   }
 }
 
-/* ---------------------------------------------------------------- TV ekranı (1280×720 px) */
-/* .tv-screen'e overflow verilmez: Chrome, 3B dönüşümlü öğede overflow:hidden olunca
-   tıklama isabet testini kaçırıyor. Kırpma .tv-content'te yapılır. */
+/* --- TV ekranı (1280×720 px) */
+/* .tv-screen'e overflow vermiyorum: Chrome 3B dönüşümlü öğede overflow:hidden olunca
+   tıklama isabetini kaçırıyor. kırpma .tv-content'te */
 .tv-screen {
   width: 1280px;
   height: 720px;

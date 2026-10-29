@@ -38,7 +38,7 @@ function plankTexture() {
   return tex;
 }
 
-// Anadolu kilimi desenli halı.
+// kilim desenli halı
 function kilimTexture() {
   return canvasTexture(1024, 720, (g, w, h) => {
     g.fillStyle = '#7a2a22';
@@ -129,7 +129,7 @@ export function buildRoom(scene) {
   return { dust: buildDust(scene) };
 }
 
-// Pencereden gelen ışıkta süzülen toz zerreleri.
+// pencere ışığında uçuşan toz
 function buildDust(scene) {
   const count = 260;
   const rand = mulberry32(3);
@@ -171,7 +171,7 @@ export function buildLighting(scene) {
   const hemi = new THREE.HemisphereLight('#ffe9d2', '#3a2a22', 0.5);
   scene.add(hemi);
 
-  // Pencereden giren gün ışığı: pervazlar zemine gölge düşürür.
+  // pencereden giren ışık, pervaz gölgesi zemine düşüyor
   const sun = new THREE.SpotLight('#fff1dc', 3, 0, 0.42, 0.7, 0);
   sun.position.set(-7.5, 3.6, -0.6);
   sun.target.position.set(-1.2, 0, -0.9);
@@ -181,7 +181,7 @@ export function buildLighting(scene) {
   sun.shadow.radius = 3;
   scene.add(sun, sun.target);
 
-  // Bulutlu ve yağışlı havada içerisi loşlaşır (0 açık hava, 1 en kasvetli).
+  // bulutlu/yağışlı havada oda loşlaşıyor (0 açık, 1 en kasvetli)
   let gloom = 0;
   fetchWeather()
     .then((d) => {
@@ -195,7 +195,7 @@ export function buildLighting(scene) {
   const state = { daylight: daylightAt(currentHour()), dark: false };
   return {
     state,
-    // shade: perdenin kapalılığı (0 açık, 1 kapalı); perde her karede değişebildiği için ışık her karede güncellenir.
+    // shade = perde ne kadar kapalı (0-1). perde her karede değişebiliyor, ışığı da her karede güncelliyorum
     update(dt, shade = 0) {
       acc += dt;
       if (acc >= 1) {
@@ -207,7 +207,7 @@ export function buildLighting(scene) {
       sun.color.copy(dl.sun);
       sun.intensity = outside * (1 - shade * 0.9);
       hemi.intensity = dl.ambient * (1 - gloom * 0.3) * (1 - shade * 0.4);
-      // Lambaların kendiliğinden yanma eşiği: ~19:20'den sonra ve ~06:00'dan önce, kapalı havada daha erken.
+      // lambalar ~19:20 sonrası ve ~06:00 öncesi kendi yanıyor, kapalı havada biraz daha erken
       state.dark = outside < 1.5;
     },
   };

@@ -16,7 +16,7 @@ function mesh(geo, material, [x = 0, y = 0, z = 0] = []) {
 const box = (w, h, d, material, pos) => mesh(new THREE.BoxGeometry(w, h, d), material, pos);
 const cyl = (rt, rb, h, material, pos, seg = 32) => mesh(new THREE.CylinderGeometry(rt, rb, h, seg), material, pos);
 
-// ---------------------------------------------------------------- TV sehpası
+// --- TV sehpası
 function tvStand() {
   const g = new THREE.Group();
   const wood = std('#6b4a33', { roughness: 0.6 });
@@ -39,13 +39,13 @@ function tvStand() {
   return g;
 }
 
-// ---------------------------------------------------------------- Plak çalar
+// --- Plak çalar
 function recordPlayer() {
   const g = new THREE.Group();
   const body = std('#2d3a3a', { roughness: 0.55 });
   g.add(box(0.9, 0.62, 0.45, body, [0, 0.35, 0]));
   g.add(box(0.8, 0.5, 0.012, std('#223030'), [0, 0.35, 0.226]));
-  // Raftaki plak kapakları
+  // raftaki plaklar
   const sleeves = ['#d35400', '#f1c40f', '#2c3e50', '#e8e1d0', '#8e44ad', '#16a085'];
   sleeves.forEach((c, i) => g.add(box(0.012, 0.32, 0.3, std(c), [-0.33 + i * 0.024, 0.28, 0.06])));
   for (const x of [-0.4, 0.4]) for (const z of [-0.18, 0.18]) g.add(cyl(0.018, 0.012, 0.04, std('#1d1a17'), [x, 0.02, z], 10));
@@ -65,8 +65,8 @@ function recordPlayer() {
   g.add(arm);
   g.position.set(2.05, 0, -3.2);
 
-  // Dokunuş çalar / durdurur; durdurulan parça kaldığı yerden devam eder. Çift dokunuş sıradaki parçaya geçer.
-  // Biten parça sıradakine geçer, liste bitince başa döner.
+  // tek dokunuş çal/durdur (kaldığı yerden devam), çift dokunuş sonraki parça
+  // parça bitince sıradakine geçiyor, liste bitince başa dönüyor
   const audio = new Audio();
   let track = -1;
   let lastTap = 0;
@@ -80,7 +80,7 @@ function recordPlayer() {
   return {
     group: g,
     toggle() {
-      // İlk dokunuş beklemeden çalar / durdurur; 350 ms içinde ikincisi gelirse sıradaki parçaya geçer.
+      // ilk dokunuşu bekletmiyorum, 350 ms içinde ikincisi gelirse sonraki parça
       const now = performance.now();
       const double = now - lastTap < 350;
       lastTap = double ? 0 : now;
@@ -100,7 +100,7 @@ function recordPlayer() {
   };
 }
 
-// ---------------------------------------------------------------- Kitaplık
+// --- Kitaplık
 function bookshelf() {
   const g = new THREE.Group();
   const rand = mulberry32(11);
@@ -131,14 +131,14 @@ function bookshelf() {
       x += w + 0.004;
     }
   }
-  // Rafın üstünde küçük bir küre
+  // rafın üstüne küçük bir küre
   g.add(cyl(0.05, 0.07, 0.03, std('#3a2a1e'), [0.25, H + 0.015, 0], 16));
   g.add(mesh(new THREE.SphereGeometry(0.11, 24, 16), std('#3f7cac', { roughness: 0.5 }), [0.25, H + 0.14, 0]));
   g.position.set(3.32, 0, -3.27);
   return g;
 }
 
-// ---------------------------------------------------------------- Çalışma masası + bilgisayar
+// --- Çalışma masası + bilgisayar
 function codeTexture() {
   const rand = mulberry32(5);
   return canvasTexture(512, 288, (g, w, h) => {
@@ -203,7 +203,7 @@ function desk() {
   return g;
 }
 
-// ---------------------------------------------------------------- Pencere
+// --- Pencere
 const skyVertex = /* glsl */ `
   varying vec2 vUv;
   void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }
@@ -230,7 +230,7 @@ const skyFragment = /* glsl */ `
     vec2 sc = floor(vUv * vec2(150.0, 130.0));
     float star = step(0.995, hash(sc)) * stars * (0.55 + 0.45 * sin(time * 2.0 + hash(sc) * 40.0));
     col += vec3(star);
-    // Güneş (gündüz) ya da ay (gece); bulut arttıkça soluklaşır
+    // gündüz güneş, gece ay. bulut arttıkça soluyor
     float sd = length((vUv - sunPos) * vec2(1.15, 1.0));
     col += sunCol * (smoothstep(0.065, 0.055, sd) + 0.3 * smoothstep(0.3, 0.0, sd)) * (1.0 - 0.85 * cloud);
     float n = noise(vUv * vec2(4.0, 3.0) + vec2(time * 0.02, 0.0)) * 0.6
@@ -238,7 +238,7 @@ const skyFragment = /* glsl */ `
     float cl = smoothstep(0.62 - cloud * 0.45, 0.9, n) * (0.35 + cloud * 0.65);
     float bright = max(max(top.r, top.g), top.b);
     col = mix(col, vec3(0.92, 0.92, 0.95) * (0.25 + 0.9 * bright), cl * 0.85);
-    // Uzaktaki şehir silüeti ve gece yanan pencereler
+    // uzakta şehir silüeti, gece pencereler yanıyor
     float bx = floor(vUv.x * 22.0);
     float bh = 0.08 + 0.17 * hash(vec2(bx, 1.0));
     if (vUv.y < bh) {
@@ -247,12 +247,12 @@ const skyFragment = /* glsl */ `
       float lit = step(0.72, hash(wc)) * step(0.45, fract(vUv.x * 110.0)) * step(0.4, fract(vUv.y * 70.0));
       col += vec3(1.0, 0.78, 0.42) * lit * (0.15 + stars * 0.8);
     }
-    // Yağmur: hafif eğik düşen çizgiler
+    // yağmur, hafif eğik çizgiler
     vec2 rp = vUv * vec2(70.0, 5.0) + vec2(vUv.y * 2.0, time * 6.0);
     vec2 rf = fract(rp);
     float drop = step(0.55, hash(floor(rp))) * step(abs(rf.x - 0.5), 0.05) * step(0.55, rf.y);
     col = mix(col, vec3(0.78, 0.84, 0.95), drop * rain * 0.55);
-    // Kar: sallanarak süzülen taneler
+    // kar, sallanarak düşüyor
     vec2 sp = vUv * vec2(18.0, 14.0) + vec2(0.0, time * 0.5);
     sp.x += sin(time * 0.8 + floor(sp.y)) * 0.3;
     float flake = step(0.5, hash(floor(sp) + 7.0)) * smoothstep(0.13, 0.06, length(fract(sp) - 0.5));
@@ -299,7 +299,7 @@ function windowObj() {
   g.position.set(-3.985, 1.62, -1.0);
   g.rotation.y = Math.PI / 2;
 
-  // Perde ayrı bir eşya: kapanınca kıvrımlar pencerenin ortasına kayar ve genişleyerek camı örter.
+  // perde ayrı eşya. kapanırken kıvrımlar ortaya kayıp genişliyor, camı kapatıyor
   const curtain = new THREE.Group();
   curtain.position.copy(g.position);
   curtain.rotation.copy(g.rotation);
@@ -317,7 +317,7 @@ function windowObj() {
   let closed = false;
   let shade = 0;
 
-  // Yağmur sesi: Web Audio ile süzülmüş beyaz gürültü; ses dosyası gerekmez.
+  // yağmur sesi = filtrelenmiş beyaz gürültü (Web Audio), dosyaya gerek yok
   let rainLevel = 0;
   let wantSound = false;
   let rainGain = null;
@@ -362,7 +362,7 @@ function windowObj() {
     get shade() {
       return shade;
     },
-    // Tarayıcılar sesi ancak bir tıklamadan sonra çalar; "Odaya gir" düğmesinde çağrılır.
+    // tarayıcı tıklama olmadan ses açtırmıyor, o yüzden "Odaya gir"de çağırıyorum
     startSound() {
       wantSound = true;
       startRain();
@@ -373,14 +373,14 @@ function windowObj() {
         f.position.x = f.userData.open + (f.userData.closed - f.userData.open) * shade;
         f.scale.x = 1 + shade * 1.6;
       }
-      // Perde kapanınca yağmur sesi kısılır.
+      // perde kapalıysa yağmur sesini kıs
       if (rainGain) rainGain.gain.value = 0.05 * rainLevel * (1 - shade * 0.6);
       const dl = daylightAt(currentHour());
       sky.uniforms.top.value.copy(dl.top);
       sky.uniforms.bottom.value.copy(dl.bottom);
       sky.uniforms.stars.value = dl.stars;
       sky.uniforms.time.value = t;
-      // Güneş 06-20 arası, ay 20-06 arası pencerede soldan sağa yay çizer
+      // güneş 06-20, ay 20-06 arası soldan sağa yay çiziyor
       const h = currentHour();
       const day = h >= 6 && h < 20;
       const k = day ? (h - 6) / 14 : ((h + 4) % 24) / 10;
@@ -390,7 +390,7 @@ function windowObj() {
   };
 }
 
-// ---------------------------------------------------------------- Duvar saati
+// --- Duvar saati
 function wallClock() {
   const g = new THREE.Group();
   const rim = cyl(0.25, 0.25, 0.05, std('#2b2420', { roughness: 0.4 }), [0, 0, 0], 48);
@@ -433,7 +433,7 @@ function wallClock() {
   };
 }
 
-// ---------------------------------------------------------------- Tablo
+// --- Tablo
 function posterTexture() {
   return canvasTexture(600, 800, (g, w, h) => {
     const sky = g.createLinearGradient(0, 0, 0, h);
@@ -472,7 +472,7 @@ function poster() {
   return g;
 }
 
-// ---------------------------------------------------------------- Ayaklı lamba
+// --- Ayaklı lamba
 function floorLamp() {
   const g = new THREE.Group();
   const brass = std('#b8924a', { metalness: 0.8, roughness: 0.35 });
@@ -498,7 +498,7 @@ function floorLamp() {
   });
 }
 
-// Lamba anahtarı: hava kararınca kendiliğinden yanar, aydınlanınca söner; arada ziyaretçinin seçimi geçerli.
+// lamba hava kararınca kendi yanıyor, aydınlanınca sönüyor. arada ziyaretçi ne seçtiyse o
 function lampSwitch(group, apply) {
   let on = false;
   let level = 0;
@@ -516,7 +516,7 @@ function lampSwitch(group, apply) {
   };
 }
 
-// ---------------------------------------------------------------- Saksı bitkisi
+// --- Saksı bitkisi
 function plant() {
   const g = new THREE.Group();
   const rand = mulberry32(21);
@@ -554,7 +554,7 @@ function plant() {
   };
 }
 
-// ---------------------------------------------------------------- Sehpa, oyun kolu, telefon
+// --- Sehpa, oyun kolu, telefon
 function coffeeTable() {
   const g = new THREE.Group();
   const wood = std('#5a3b28', { roughness: 0.5 });
@@ -618,7 +618,7 @@ function phone() {
   return g;
 }
 
-// ---------------------------------------------------------------- Dekor
+// --- Dekor
 function pendantLamp() {
   const g = new THREE.Group();
   const black = std('#1d1d1f', { metalness: 0.4, roughness: 0.5, side: THREE.DoubleSide });
@@ -675,11 +675,11 @@ function sofa() {
   return g;
 }
 
-// ---------------------------------------------------------------- Kedi
-// Tekir kedi: odada mobilyalara çarpmayan bir rotada gezinir, yer yer oturup yalanır, güneş vuran yerde uyur,
-// uyanınca gerinir. Dokununca oturup sana bakar. Duruşlar eklem açılarıyla (radyan) tanımlı ve yumuşakça
-// birbirine geçer. Açılarda + bacağı öne, kuyruğu arkaya, başı yukarı döndürür.
-// f/r: ön/arka bacak, U/L: üst/alt parça.
+// --- Kedi
+// tekir kedi. mobilyalara çarpmadan geziyor, arada oturup yalanıyor, güneşte uyuyor,
+// uyanınca geriniyor. dokununca oturup sana bakıyor. duruşlar eklem açısı (radyan), aralarında yumuşak geçiş var
+// açı + ise bacak öne, kuyruk arkaya, baş yukarı
+// f/r = ön/arka bacak, U/L = üst/alt parça
 const CAT_POSES = {
   stand: { hip: 0.17, pitch: 0, fU: 0.05, fL: -0.05, rU: 0.35, rL: -0.7, head: 0.05, headY: 0, eyes: 1, tailBase: 1.15, tailUp: -0.16, tailSide: 0 },
   sit: { hip: 0.055, pitch: 0.55, fU: -0.55, fL: 0, rU: 0.9, rL: -3.0, head: -0.4, headY: 0, eyes: 1, tailBase: 1.3, tailUp: 0.02, tailSide: 0.3 },
@@ -688,18 +688,18 @@ const CAT_POSES = {
 };
 CAT_POSES.groom = CAT_POSES.look = CAT_POSES.sit;
 const CAT_ROUTE = [
-  { x: -2.0, z: -1.1, act: 'sleep', time: 14 }, // pencereden giren güneşin düştüğü yer
+  { x: -2.0, z: -1.1, act: 'sleep', time: 14 }, // güneşin vurduğu yer
   { x: -1.7, z: -2.45 },
   { x: 1.6, z: -2.45, act: 'groom', time: 5 },
   { x: 2.4, z: -1.4, act: 'sit', time: 3 },
   { x: 1.6, z: -0.15 },
   { x: -1.6, z: -0.15 },
 ];
-const VIEWER = { x: 0, z: 3.35 }; // genel görünüm kamerası; kedi dokununca buraya bakar
-const STRIDE = 0.24; // bir adım döngüsünde alınan yol; patiler yerde kaymasın diye adımlar yola bağlı
+const VIEWER = { x: 0, z: 3.35 }; // genel görünüm kamerası, dokununca kedi buraya bakıyor
+const STRIDE = 0.24; // bir adım döngüsündeki yol. adımı yola bağladım ki patiler kaymasın
 
-// Tekir deseni. Doku yatayda gövdenin çevresini sarar: u=0.25 karın (krem), u=0.75 sırt (koyu).
-// Çizgiler sırtta kalın, karna doğru incelir.
+// tekir deseni. doku gövdeyi yatayda sarıyor: u=0.25 karın (krem), u=0.75 sırt (koyu)
+// çizgiler sırtta kalın, karına doğru inceliyor
 function tabbyTexture() {
   const rand = mulberry32(5);
   return canvasTexture(256, 256, (g, w, h) => {
@@ -728,7 +728,7 @@ function tabbyTexture() {
   });
 }
 
-// Kuyruk dokusu: yatayda kuyruğun boyu; halkalar ve koyu uç.
+// kuyruk dokusu, yatay eksen kuyruk boyu: halkalar + koyu uç
 function tailTexture() {
   return canvasTexture(256, 32, (g, w, h) => {
     g.fillStyle = '#cf8a4a';
@@ -751,13 +751,13 @@ function cat() {
   const dark = std('#140f0b', { roughness: 0.3 });
   const eyeMat = std('#b8c43c', { emissive: '#2c300c', roughness: 0.15 });
 
-  // Kökün +x yönü kedinin önü; gövdenin dönme noktası arka kalça.
+  // root'un +x'i kedinin önü, gövde arka kalçadan dönüyor
   const root = new THREE.Group();
   const torso = new THREE.Group();
   torso.position.x = -0.12;
   root.add(torso);
 
-  // Gövde yandan bakınca kedi silueti: yuvarlak kalça, ince bel, derin göğüs.
+  // yandan kedi silueti: yuvarlak kalça, ince bel, derin göğüs
   const profile = [[0, -0.03], [0.045, -0.02], [0.068, 0], [0.074, 0.05], [0.064, 0.12], [0.072, 0.19], [0.068, 0.25], [0.05, 0.29], [0.03, 0.31], [0, 0.315]];
   const body = mesh(new THREE.LatheGeometry(profile.map(([r, y]) => new THREE.Vector2(r, y)), 32), fur, [-0.03, 0.02, 0]);
   body.rotation.z = -Math.PI / 2;
@@ -771,7 +771,7 @@ function cat() {
     const top = new THREE.Group();
     top.position.set(x, 0, z);
     const thigh = mesh(new THREE.CapsuleGeometry(thick, upper, 4, 10), fur, [0, -upper / 2, 0]);
-    // Kalça / omuz kası: bacağın üstünü gövdeyle kaynaştırır.
+    // kalça/omuz kası, bacağı gövdeye bağlıyor
     const muscle = mesh(new THREE.SphereGeometry(thick * 1.6, 14, 10), face, [0, -upper * 0.25, 0]);
     muscle.scale.set(1, 1.25, 0.55);
     top.add(thigh, muscle);
@@ -789,7 +789,7 @@ function cat() {
   const rear = [leg(0.02, -0.032, 0.09, 0.085, 0.026), leg(0.02, 0.032, 0.09, 0.085, 0.026)];
 
   const head = new THREE.Group();
-  head.rotation.order = 'YZX'; // önce başını kaldırır, sonra yana çevirir
+  head.rotation.order = 'YZX'; // önce baş kalkıyor sonra yana dönüyor
   head.position.set(0.28, 0.07, 0);
   head.scale.setScalar(0.9);
   torso.add(head);
@@ -813,7 +813,7 @@ function cat() {
   const ears = [-0.03, 0.03].map((z) => {
     const ear = new THREE.Group();
     ear.position.set(0.015, 0.066, z);
-    ear.rotation.x = Math.sign(z) * 0.3; // dışa doğru eğik
+    ear.rotation.x = Math.sign(z) * 0.3; // dışa eğik
     const outer = mesh(new THREE.ConeGeometry(0.022, 0.045, 12), face);
     outer.scale.x = 0.45;
     const inner = mesh(new THREE.ConeGeometry(0.014, 0.032, 10), pink, [0.006, -0.004, 0]);
@@ -822,7 +822,7 @@ function cat() {
     head.add(ear);
     return ear;
   });
-  // Bıyıklar: her yanda üç ince çizgi.
+  // bıyıklar, her yana 3 tane
   const whisker = [];
   for (const s of [-1, 1]) {
     for (const dy of [-0.012, 0, 0.012]) whisker.push(0.08, -0.012, s * 0.02, 0.06, -0.012 + dy * 1.6, s * 0.095);
@@ -831,8 +831,8 @@ function cat() {
   wGeo.setAttribute('position', new THREE.Float32BufferAttribute(whisker, 3));
   head.add(new THREE.LineSegments(wGeo, new THREE.LineBasicMaterial({ color: '#f6efe2', transparent: true, opacity: 0.75 })));
 
-  // Kuyruk iskeleti iç içe 11 eklem: her eklemin açısı bir öncekine eklenir, böylece kıvrılabilir.
-  // Görünen kuyruk, eklemlerden geçen ve uca doğru incelen tek bir tüp; her karede yeniden kurulur.
+  // kuyruk 11 eklem, her açı bir öncekine ekleniyor ki kıvrılabilsin
+  // görünen kısım eklemlerden geçen, uca doğru incelen tek tüp. her karede yeniden kuruluyor
   const tail = new THREE.Group();
   tail.position.set(-0.055, 0.04, 0);
   torso.add(tail);
@@ -908,7 +908,7 @@ function cat() {
           }
           target = (target + 1) % CAT_ROUTE.length;
         } else {
-          // Önce hedefe döner, döndükçe hızlanır.
+          // önce hedefe dönüyor, döndükçe hızlanıyor
           const turn = wrap(Math.atan2(-dz, dx) - heading);
           const spin = THREE.MathUtils.clamp(turn, -2.5 * dt, 2.5 * dt);
           heading += spin;
@@ -928,7 +928,7 @@ function cat() {
       walk += ((state === 'walk' ? 1 : 0) - walk) * k;
       const lookYaw =
         state === 'look' ? THREE.MathUtils.clamp(wrap(Math.atan2(-(VIEWER.z - pos.y), VIEWER.x - pos.x) - heading), -1.3, 1.3) : 0;
-      // Uyurken başını yana, kıvrılmış gövdesine yaslar; yalanırken patisine döner.
+      // uyurken başı kıvrılmış gövdesine yaslı, yalanırken patiye dönük
       const restYaw = { sleep: -0.6, groom: -0.3 }[state] ?? lookYaw;
       yaw += (restYaw - yaw) * k;
 
@@ -938,14 +938,14 @@ function cat() {
       torso.rotation.z = pose.pitch;
       body.scale.x = 1 + Math.sin(t * (state === 'sleep' ? 1.6 : 2.4)) * 0.025; // nefes
 
-      // Yürüyüş sırası: sol arka, sol ön, sağ arka, sağ ön. Bacak öne giderken diz bükülüp pati kalkar.
+      // yürüyüş sırası: sol arka, sol ön, sağ arka, sağ ön. bacak öne gelirken diz bükülüp pati kalkıyor
       const legs = [[rear[0], 0, 'r'], [front[0], 0.5, 'f'], [rear[1], 1, 'r'], [front[1], 1.5, 'f']];
       for (const [l, off, side] of legs) {
         const p = phase + off * Math.PI;
         l.top.rotation.z = pose[side + 'U'] + Math.sin(p) * 0.4 * walk;
         l.knee.rotation.z = pose[side + 'L'] - Math.max(0, Math.cos(p)) * 0.7 * walk;
       }
-      // Yalanma: sağ ön pati ağza kalkar, baş patiye eğilip iner kalkar.
+      // yalanma: sağ ön pati ağza, baş patiye inip kalkıyor
       const groom = state === 'groom' ? 1 : 0;
       front[1].top.rotation.z += groom * 1.7;
       front[1].knee.rotation.z += groom * -2.2;
@@ -954,7 +954,7 @@ function cat() {
       head.position.y = 0.07 + pose.headY;
       const blink = t % 4.3 < 0.12 ? 0.1 : 1;
       eyes.forEach((e) => (e.scale.y = 0.85 * Math.min(pose.eyes, blink)));
-      // Ara sıra bir kulak geriye seğirir.
+      // arada bir kulak seğiriyor
       ears[0].rotation.z = t % 5.7 < 0.15 ? -0.5 : 0;
       tail.rotation.z = pose.tailBase;
       const swish = state === 'look' ? 0.25 : 0.07;
@@ -968,7 +968,7 @@ function cat() {
   };
 }
 
-// ---------------------------------------------------------------- Kurulum
+// --- Kurulum
 export function buildFurniture(scene) {
   const player = recordPlayer();
   const win = windowObj();
@@ -978,7 +978,7 @@ export function buildFurniture(scene) {
   const pendant = pendantLamp();
   const kitty = cat();
 
-  // Ortadaki kanepe TV'ye bakar; sehpadaki oyun kolu ve telefonu genel görünümde örtmesin diye geride durur.
+  // kanepe TV'ye dönük. genel görünümde sehpadaki kolu ve telefonu kapatmasın diye biraz geride
   const couch = sofa();
   couch.position.set(0, 0, 0.6);
   couch.rotation.y = Math.PI;
@@ -986,7 +986,7 @@ export function buildFurniture(scene) {
   const decor = [tvStand(), coffeeTable(), armchair(), couch, poster()];
   decor.forEach((d) => scene.add(d));
 
-  // Her eşya bir tetikleyici: channel → TV'de açılır, action → odada bir şey olur.
+  // her eşya ya channel (TV'de açılır) ya da action (odada bir şey yapar)
   const items = [
     { id: 'bookshelf', label: 'Kitaplık', hint: 'Hakkımda', channel: 'about', object: bookshelf() },
     { id: 'desk', label: 'Bilgisayar', hint: 'Projeler', channel: 'projects', object: desk() },

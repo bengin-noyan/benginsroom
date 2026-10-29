@@ -1,7 +1,7 @@
 import { config } from './config.js';
 import { esc } from './utils.js';
 
-// Basit görünüm: odadaki içeriğin tamamı, kaydırılabilir tek bir sayfada.
+// basit görünüm: her şey kaydırılabilir tek sayfada
 const { about } = config;
 document.documentElement.classList.add('simple');
 document.body.innerHTML = `

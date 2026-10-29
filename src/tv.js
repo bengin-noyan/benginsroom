@@ -2,8 +2,8 @@ import * as THREE from 'three';
 import { CSS3DObject } from 'three/addons/renderers/CSS3DRenderer.js';
 import { wait } from './utils.js';
 
-// TV ekranı gerçek bir DOM öğesi: CSS3DRenderer ile 3B ekranın üzerine oturtulur,
-// böylece iframe, video ve etkileşimli sayfalar ekranda canlı çalışır.
+// ekran gerçek bir DOM öğesi, CSS3DRenderer ile TV'nin üstüne oturuyor.
+// bu sayede iframe, video vs. ekranda canlı çalışıyor
 export const SCREEN_PX = { w: 1280, h: 720 };
 
 export class TV {
@@ -23,8 +23,8 @@ export class TV {
     const backBox = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.6, 0.06), shell);
     backBox.position.z = -0.055;
     this.group.add(backBox);
-    // Ekran "delik" olarak çizilir: WebGL bu bölgeyi saydam bırakır, arkadaki DOM ekran görünür;
-    // önündeki 3B nesneler ise derinlik testi sayesinde ekranı doğru şekilde örter.
+    // ekranı "delik" olarak çiziyorum: WebGL orayı saydam bırakıyor, arkadaki DOM görünüyor.
+    // öndeki nesneler derinlik testiyle ekranı yine doğru kapatıyor
     const hole = new THREE.MeshBasicMaterial({ color: '#000', opacity: 0, blending: THREE.NoBlending });
     const screen = new THREE.Mesh(new THREE.PlaneGeometry(this.screenW, this.screenH), hole);
     screen.position.z = 0.031;
@@ -50,12 +50,12 @@ export class TV {
     this.noise = this.el.querySelector('canvas').getContext('2d');
     this.noiseImg = this.noise.createImageData(256, 144);
 
-    // DOM ekran ayrı bir CSS sahnesinde, dünya cssScale kat büyütülmüş olarak çizilir;
-    // böylece 1280 px'lik öğe 1:1 ölçekte kalır, metre biriminde minik ölçek değerleri gerekmez.
+    // DOM ekran ayrı CSS sahnesinde, dünya cssScale kat büyük çiziliyor.
+    // böylece 1280 px'lik öğe 1:1 kalıyor, metrede minicik scale değerleriyle uğraşmıyorum
     this.cssScale = SCREEN_PX.w / this.screenW;
     this.cssObject = new CSS3DObject(this.el);
 
-    // Ekranın odaya yaydığı ışık, kanalın rengini alır.
+    // TV ışığı kanalın rengini alıyor
     this.glow = new THREE.PointLight('#7aa2ff', 0, 6, 2);
     this.glow.position.set(0, 0, 0.7);
     this.group.add(this.glow);
@@ -63,7 +63,7 @@ export class TV {
     this.glowLevel = 0;
   }
 
-  // Kamera ekrana yakın ve karşıdan bakıyorsa arada nesne kalmaz; DOM öne alınıp etkileşimli olur.
+  // yakından ve karşıdan bakınca arada nesne kalmıyor, DOM'u öne alıp etkileşimli yap
   isViewedHeadOn(camera) {
     const center = this.screenCenter();
     const toCam = camera.position.clone().sub(center);

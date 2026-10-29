@@ -14,7 +14,7 @@ const backBtn = document.getElementById('back');
 const dock = document.getElementById('dock');
 const hint = document.getElementById('hint');
 
-// ---------------------------------------------------------------- Render katmanları
+// --- Render katmanları
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.setSize(innerWidth, innerHeight);
@@ -24,8 +24,8 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.05;
 app.appendChild(renderer.domElement);
 
-// TV ekranının DOM katmanı. Normalde WebGL'in arkasında durur ve ekrandaki "delik"ten görünür;
-// TV'ye karşıdan yakın bakılınca öne alınır ve tıklanabilir olur (bkz. tv.isViewedHeadOn).
+// TV ekranının DOM katmanı normalde WebGL'in arkasında, ekrandaki delikten görünüyor.
+// TV'ye yakından karşıdan bakınca öne alıyorum, o zaman tıklanabiliyor (tv.isViewedHeadOn)
 const cssRenderer = new CSS3DRenderer();
 cssRenderer.setSize(innerWidth, innerHeight);
 cssRenderer.domElement.className = 'css-layer';
@@ -36,7 +36,7 @@ const cssScene = new THREE.Scene();
 scene.background = new THREE.Color('#0d0b10');
 const camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.05, 50);
 
-// Dikey ekranda oda yanlardan kesilmesin: yatay görüş ~75° kalacak kadar açılır (55°–85° arası).
+// dikey ekranda oda yanlardan kesilmesin, yatay görüş ~75° olacak kadar açıyorum (55-85 arası)
 function fitCamera() {
   camera.aspect = innerWidth / innerHeight;
   const need = THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(37.5)) / camera.aspect));
@@ -45,7 +45,7 @@ function fitCamera() {
 }
 fitCamera();
 
-// ---------------------------------------------------------------- Oda
+// --- Oda
 const room = buildRoom(scene);
 const lighting = buildLighting(scene);
 const furniture = buildFurniture(scene);
@@ -64,14 +64,14 @@ const tvItem = {
 };
 const items = [tvItem, ...furniture.items];
 
-// ---------------------------------------------------------------- Kamera
+// --- Kamera
 const OVERVIEW = { pos: new THREE.Vector3(0, 1.7, 3.35), target: new THREE.Vector3(0, 1.1, -1.6) };
 const DOORWAY = { pos: new THREE.Vector3(0, 1.8, 6.5), target: new THREE.Vector3(0, 1.3, -1.6) };
 const cssCamera = camera.clone();
 const rig = new CameraRig(camera, renderer.domElement);
 rig.jump(DOORWAY.pos, DOORWAY.target);
 
-// Ekranın görüntüye sığacağı mesafe, en-boy oranına göre hesaplanır.
+// ekranın tam sığacağı mesafe, en-boy oranına göre
 function tvView() {
   const center = tv.screenCenter();
   const halfFov = THREE.MathUtils.degToRad(camera.fov / 2);
@@ -104,7 +104,7 @@ function openChannel(id) {
   dock.querySelectorAll('button').forEach((b) => b.classList.toggle('active', b.dataset.channel === id));
 }
 
-// ---------------------------------------------------------------- Etkileşim
+// --- Etkileşim
 const interaction = new Interaction({
   camera,
   scene,
@@ -118,7 +118,7 @@ const interaction = new Interaction({
 });
 interaction.enabled = false;
 
-// Erişilebilir alternatif: odadaki her eşya alttaki çubukta da bir düğme.
+// erişilebilirlik için her eşyanın alttaki çubukta bir düğmesi de var
 for (const item of items) {
   const b = document.createElement('button');
   b.type = 'button';
@@ -160,7 +160,7 @@ addEventListener('resize', () => {
   }
 });
 
-// ---------------------------------------------------------------- Döngü
+// --- Döngü
 const clock = new THREE.Clock();
 renderer.setAnimationLoop(() => {
   const dt = Math.min(clock.getDelta(), 0.1);
