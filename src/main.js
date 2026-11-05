@@ -162,7 +162,8 @@ addEventListener('resize', () => {
 
 // --- Döngü
 const clock = new THREE.Clock();
-renderer.setAnimationLoop(() => {
+// shader'lar önce arka planda derleniyor, yoksa ilk kare derleme bitene kadar sayfayı donduruyor
+renderer.compileAsync(scene, camera).finally(() => renderer.setAnimationLoop(() => {
   const dt = Math.min(clock.getDelta(), 0.1);
   const t = clock.elapsedTime;
   rig.update();
@@ -178,6 +179,6 @@ renderer.setAnimationLoop(() => {
   cssCamera.updateMatrixWorld();
   tv.syncCss();
   cssRenderer.render(cssScene, cssCamera);
-});
+}));
 
 if (import.meta.env.DEV) window.__room = { camera, rig, tv, scene };

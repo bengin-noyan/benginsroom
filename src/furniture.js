@@ -807,20 +807,6 @@ function tailTexture() {
   });
 }
 
-// tüylere hafif pürüz veren kabartma haritası
-function furBump() {
-  const rand = mulberry32(3);
-  return canvasTexture(256, 256, (g, w, h) => {
-    g.fillStyle = '#808080';
-    g.fillRect(0, 0, w, h);
-    for (let i = 0; i < 9000; i++) {
-      const v = 90 + rand() * 80;
-      g.fillStyle = `rgb(${v}, ${v}, ${v})`;
-      g.fillRect(rand() * w, rand() * h, 1, 2 + rand() * 4);
-    }
-  });
-}
-
 // tüy katmanları (shell fur): aynı geometri normal yönünde katman katman şişiriliyor, her katmanda yalnızca
 // o yüksekliğe ulaşan kıllar (strand dokusundaki parlak pikseller) kalıyor. dipteki katmanlar koyu, uçlar açık
 const SHELLS = 6;
@@ -855,11 +841,15 @@ function addFur(root, mats) {
           alphaMap: strands,
           alphaTest: k * 0.85,
         });
-        const off = (k * FUR_LEN).toFixed(5);
+        // kalınlık uniform'da, böylece bütün katmanlar tek shader programını paylaşıyor
+        const furOffset = { value: k * FUR_LEN };
         m.onBeforeCompile = (sh) => {
-          sh.vertexShader = sh.vertexShader.replace('#include <begin_vertex>', `#include <begin_vertex>\n transformed += normal * ${off};`);
+          sh.uniforms.furOffset = furOffset;
+          sh.vertexShader =
+            'uniform float furOffset;\n' +
+            sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n transformed += normal * furOffset;');
         };
-        m.customProgramCacheKey = () => 'catfur' + i;
+        m.customProgramCacheKey = () => 'catfur';
         return m;
       }));
     }
@@ -936,19 +926,19 @@ function catSkullGeo() {
 }
 
 function cat() {
-  const bump = furBump();
-  const furOpts = { roughness: 1, sheen: 0.35, sheenRoughness: 0.8, sheenColor: new THREE.Color('#ffd4a0'), bumpMap: bump, bumpScale: 0.3 };
-  const furMat = (o) => new THREE.MeshPhysicalMaterial({ ...furOpts, ...o });
+  // Physical ve bumpMap yok: ikisi de açılışta ayrı shader derletip sayfayı donduruyordu. tüy görünümünü katmanlar veriyor
+  const furOpts = { roughness: 1 };
+  const furMat = (o) => new THREE.MeshStandardMaterial({ ...furOpts, ...o });
   const fur = furMat({ map: tabbyTexture() });
   const headFur = furMat({ map: headTexture() });
-  const legFur = furMat({ map: legTexture(false), bumpScale: 0.25 });
-  const sockFur = furMat({ map: legTexture(true), bumpScale: 0.25 });
+  const legFur = furMat({ map: legTexture(false) });
+  const sockFur = furMat({ map: legTexture(true) });
   const face = furMat({ color: CAT_ORANGE });
   const tip = furMat({ color: '#7a4019' });
   const cream = furMat({ color: '#f2e0c4' });
   const pink = std('#c98080', { roughness: 0.5 });
   const dark = std('#120d0a', { roughness: 0.3 });
-  const irisMat = new THREE.MeshPhysicalMaterial({ color: '#c4ae3a', emissive: '#221c06', roughness: 0.15, clearcoat: 1 });
+  const irisMat = std('#c4ae3a', { emissive: '#221c06', roughness: 0.15 });
 
   // root'un +x'i kedinin önü, gövde arka kalçadan dönüyor
   const root = new THREE.Group();
