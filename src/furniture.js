@@ -632,10 +632,7 @@ function pendantLamp() {
   g.add(bulb);
   const light = new THREE.PointLight('#ffd2a1', 9, 0, 2);
   light.position.set(0, 2.4, 0);
-  light.castShadow = true;
-  light.shadow.mapSize.set(1024, 1024);
-  light.shadow.bias = -0.002;
-  light.shadow.radius = 4;
+  // gölge yok: nokta ışık gölgesi her karede odayı 6 kez daha çizdiriyor ve açılışı yavaşlatıyordu
   g.add(light);
   g.position.set(0, 0, -0.2);
 

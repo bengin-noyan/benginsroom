@@ -176,7 +176,7 @@ export function buildLighting(scene) {
   sun.position.set(-7.5, 3.6, -0.6);
   sun.target.position.set(-1.2, 0, -0.9);
   sun.castShadow = true;
-  sun.shadow.mapSize.set(1024, 1024);
+  sun.shadow.mapSize.set(512, 512);
   sun.shadow.bias = -0.0015;
   sun.shadow.radius = 3;
   scene.add(sun, sun.target);
