@@ -118,13 +118,13 @@ const interaction = new Interaction({
 });
 interaction.enabled = false;
 
-// erişilebilirlik için her eşyanın alttaki çubukta bir düğmesi de var
-for (const item of items) {
+// erişilebilirlik için kanal açan her eşyanın alttaki çubukta bir düğmesi de var
+for (const item of items.filter((i) => i.channel)) {
   const b = document.createElement('button');
   b.type = 'button';
   b.textContent = item.label;
   b.title = item.hint;
-  if (item.channel) b.dataset.channel = item.channel;
+  b.dataset.channel = item.channel;
   b.addEventListener('click', () => interaction.activate(item));
   b.addEventListener('mouseenter', () => interaction.setHover(item, { showTooltip: false }));
   b.addEventListener('mouseleave', () => interaction.setHover(null));
