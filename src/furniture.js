@@ -821,6 +821,61 @@ function furBump() {
   });
 }
 
+// tüy katmanları (shell fur): aynı geometri normal yönünde katman katman şişiriliyor, her katmanda yalnızca
+// o yüksekliğe ulaşan kıllar (strand dokusundaki parlak pikseller) kalıyor. dipteki katmanlar koyu, uçlar açık
+const SHELLS = 6;
+const FUR_LEN = 0.005;
+function strandTexture() {
+  const rand = mulberry32(11);
+  const tex = canvasTexture(128, 128, (g, w, h) => {
+    const img = g.createImageData(w, h);
+    for (let i = 0; i < w * h; i++) {
+      const v = Math.pow(rand(), 0.6) * 255;
+      img.data.set([v, v, v, 255], i * 4);
+    }
+    g.putImageData(img, 0, 0);
+  });
+  tex.colorSpace = THREE.NoColorSpace;
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(4, 4);
+  tex.magFilter = THREE.NearestFilter;
+  return tex;
+}
+function addFur(root, mats) {
+  const strands = strandTexture();
+  const layers = new Map();
+  const shellMats = (base) => {
+    if (!layers.has(base)) {
+      layers.set(base, Array.from({ length: SHELLS }, (_, i) => {
+        const k = (i + 1) / SHELLS;
+        const m = new THREE.MeshStandardMaterial({
+          map: base.map,
+          color: base.color.clone().multiplyScalar(0.5 + 0.5 * k),
+          roughness: 1,
+          alphaMap: strands,
+          alphaTest: k * 0.85,
+        });
+        const off = (k * FUR_LEN).toFixed(5);
+        m.onBeforeCompile = (sh) => {
+          sh.vertexShader = sh.vertexShader.replace('#include <begin_vertex>', `#include <begin_vertex>\n transformed += normal * ${off};`);
+        };
+        m.customProgramCacheKey = () => 'catfur' + i;
+        return m;
+      }));
+    }
+    return layers.get(base);
+  };
+  const targets = [];
+  root.traverse((o) => o.isMesh && mats.includes(o.material) && targets.push(o));
+  for (const o of targets) {
+    for (const m of shellMats(o.material)) {
+      const sh = new THREE.Mesh(o.geometry, m);
+      sh.receiveShadow = true;
+      o.add(sh);
+    }
+  }
+}
+
 // üstü (y=0) geniş, altı dar, uçları yuvarlak uzuv. top: üst yarıçap, ratio: alt/üst
 function limbGeo(top, len, ratio) {
   const geo = new THREE.CapsuleGeometry(top, len, 6, 20);
@@ -848,9 +903,9 @@ function catBodyGeo() {
   const geo = new THREE.SphereGeometry(1, 48, 32);
   geo.rotateZ(-Math.PI / 2);
   const p = geo.attributes.position;
-  const top = [0.058, 0.063, 0.057, 0.06, 0.056];
-  const bot = [0.058, 0.046, 0.052, 0.072, 0.066];
-  const wid = [0.05, 0.053, 0.045, 0.05, 0.046];
+  const top = [0.054, 0.058, 0.053, 0.057, 0.052];
+  const bot = [0.056, 0.04, 0.05, 0.07, 0.064];
+  const wid = [0.044, 0.047, 0.04, 0.045, 0.042];
   for (let i = 0; i < p.count; i++) {
     const s = p.getX(i);
     const c = Math.sqrt(Math.max(0, 1 - s * s));
@@ -882,7 +937,7 @@ function catSkullGeo() {
 
 function cat() {
   const bump = furBump();
-  const furOpts = { roughness: 0.92, sheen: 1, sheenRoughness: 0.55, sheenColor: new THREE.Color('#ffd4a0'), bumpMap: bump, bumpScale: 0.6 };
+  const furOpts = { roughness: 1, sheen: 0.35, sheenRoughness: 0.8, sheenColor: new THREE.Color('#ffd4a0'), bumpMap: bump, bumpScale: 0.3 };
   const furMat = (o) => new THREE.MeshPhysicalMaterial({ ...furOpts, ...o });
   const fur = furMat({ map: tabbyTexture() });
   const headFur = furMat({ map: headTexture() });
@@ -917,16 +972,22 @@ function cat() {
     const top = new THREE.Group();
     top.position.set(x, 0, z);
     // omuz ve but yukarıda gövdenin içine giriyor ki bacak gövdeden çıkıyormuş gibi dursun
-    const muscle = mesh(new THREE.SphereGeometry(f ? 0.034 : 0.046, 18, 14), legFur, f ? [-0.004, 0, 0] : [0, -0.01, 0]);
-    muscle.scale.set(f ? 1 : 1, f ? 1.6 : 1.45, f ? 0.8 : 0.72);
-    top.add(mesh(limbGeo(f ? 0.024 : 0.03, upper, f ? 0.62 : 0.5), legFur), muscle);
+    const muscle = mesh(new THREE.SphereGeometry(f ? 0.03 : 0.04, 18, 14), legFur, f ? [-0.004, 0.004, 0] : [0, 0, 0]);
+    muscle.scale.set(f ? 0.9 : 1.05, f ? 1.6 : 1.45, f ? 0.75 : 0.72);
+    top.add(mesh(limbGeo(f ? 0.021 : 0.027, upper, f ? 0.65 : 0.5), legFur), muscle);
     const knee = new THREE.Group();
     knee.position.y = -upper;
     top.add(knee);
-    knee.add(mesh(limbGeo(f ? 0.0135 : 0.0125, lower, 0.85), sockFur));
-    const paw = mesh(new THREE.SphereGeometry(0.0165, 16, 10), cream, [0.007, -lower - 0.002, 0]);
-    paw.scale.set(1.3, 0.6, 1);
+    knee.add(mesh(limbGeo(f ? 0.0125 : 0.0115, lower, 0.85), sockFur));
+    // pati: taban + önde dört parmak
+    const paw = mesh(new THREE.SphereGeometry(0.0155, 14, 10), cream, [0.004, -lower - 0.003, 0]);
+    paw.scale.set(1.2, 0.55, 1);
     knee.add(paw);
+    for (const tz of [-0.0105, -0.0035, 0.0035, 0.0105]) {
+      const toe = mesh(new THREE.SphereGeometry(0.006, 10, 8), cream, [0.019 - Math.abs(tz) * 0.35, -lower - 0.005, tz * 1.1]);
+      toe.scale.set(1.1, 0.8, 1);
+      knee.add(toe);
+    }
     torso.add(top);
     return { top, knee };
   };
@@ -1034,8 +1095,10 @@ function cat() {
     }
     tailMesh.geometry.dispose();
     tailMesh.geometry = geo;
+    tailMesh.children.forEach((sh) => (sh.geometry = geo));
     tipCap.position.copy(c);
   };
+  addFur(root, [fur, headFur, legFur, tailMat]); // alt bacak tüyü kısa, katman yok
 
   const pose = { ...CAT_POSES.sleep };
   const pos = new THREE.Vector2(CAT_ROUTE[0].x, CAT_ROUTE[0].z);
