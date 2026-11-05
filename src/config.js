@@ -24,14 +24,14 @@ export const config = {
       org: 'NowlSoft',
       date: '07/2026 – 10/2026',
       place: 'Batman',
-      desc: 'Kamu kurumları ve işletmeler için ERP ve süreç otomasyonları; Go (Wails3), C# (.NET), Vue 3 ve React ile LAN tabanlı dağıtık sistemler, UBL-TR 1.2 e-Fatura, RBAC ve YOLOv8 entegrasyonları.',
+      desc: 'Belediyeler, kamu kurumları ve işletmeler için ERP, süreç otomasyonu ve veri yönetimi yazılımları. Go (Wails3), C# (.NET), Vue 3 ve React ile LAN tabanlı dağıtık sistemler ve CGO-free tek dosyalı masaüstü uygulamaları; kur farkı korumalı finansal hesap motorları, UBL-TR 1.2 e-Fatura, SQL migration, RBAC ve YOLOv8 tabanlı saha entegrasyonları.',
     },
     {
       role: 'IT Destek Asistanı · İŞKUR Gençlik Programı',
       org: 'Pamukkale Üniversitesi İİBF Bilgi İşlem',
       date: '01/2026 – 06/2026',
       place: 'Denizli',
-      desc: 'Sunucu ve bilgisayar yapılandırması, yazılım kurulum ve lisanslama, Active Directory yetkilendirmeleri, veri yedekleme takibi ve ticket yönetimi.',
+      desc: 'Fakülte sunucu ve bilgisayarlarının yapılandırması; kurumsal yazılım, veritabanı istemcisi ve geliştirme araçlarının kurulum ve lisanslaması. Active Directory ve e-posta yetkilendirmeleri, veri yedekleme takibi, ticket analizi ve süreç iyileştirme raporları.',
     },
     {
       role: 'Yönetim Bilişim Sistemleri, Lisans',
@@ -81,7 +81,7 @@ export const config = {
     {
       name: 'DentalPro',
       year: 'Canlıda',
-      desc: 'Diş klinikleri ve protez laboratuvarları için çok kiracılı SaaS. PostgreSQL RLS ile veri izolasyonu, ödeme, SMS ve e-Fatura entegrasyonları.',
+      desc: 'Klinik ve protez laboratuvarları için canlıda çok kiracılı SaaS; PostgreSQL RLS, iyzico, NetGSM ve QNB e-Fatura entegrasyonları.',
       tags: ['Go', 'Vue 3', 'PostgreSQL'],
       href: 'https://dentalpro.tr',
     },
@@ -94,7 +94,7 @@ export const config = {
     {
       name: 'Bitki Hastalığı Teşhisi',
       year: '2026',
-      desc: 'Bitirme tezi: YOLOv8 ile bitki hastalığı teşhisi (%94.1 mAP50) ve Streamlit tabanlı karar destek paneli.',
+      desc: 'Bitirme tezi: YOLOv8 ile bitki hastalığı teşhisi (%94.1 mAP50, 2 sn altı çıkarım) ve Firebase senkronlu Streamlit karar destek paneli.',
       tags: ['Python', 'YOLOv8', 'Streamlit'],
     },
     {
