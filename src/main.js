@@ -10,6 +10,7 @@ import { channels } from './channels/index.js';
 const app = document.getElementById('app');
 const tooltip = document.getElementById('tooltip');
 const intro = document.getElementById('intro');
+const enter = document.getElementById('enter');
 const backBtn = document.getElementById('back');
 const dock = document.getElementById('dock');
 const hint = document.getElementById('hint');
@@ -140,7 +141,7 @@ addEventListener('keydown', (e) => {
   if (e.key === 'Escape') leaveTV();
 });
 
-document.getElementById('enter').addEventListener('click', () => {
+enter.addEventListener('click', () => {
   intro.classList.add('gone');
   document.body.classList.add('entered');
   rig.flyTo(OVERVIEW.pos, OVERVIEW.target, 2.6);
@@ -179,6 +180,11 @@ renderer.compileAsync(scene, camera).finally(() => renderer.setAnimationLoop(() 
   cssCamera.updateMatrixWorld();
   tv.syncCss();
   cssRenderer.render(cssScene, cssCamera);
+  // oda ilk kez çizilene kadar giriş düğmesi kapalı, yoksa basınca bir şey olmuyor gibi görünüyor
+  if (enter.disabled) {
+    enter.disabled = false;
+    enter.textContent = 'Odaya gir';
+  }
 }));
 
 if (import.meta.env.DEV) window.__room = { camera, rig, tv, scene };
